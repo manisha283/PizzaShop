@@ -42,3 +42,47 @@ D:\Project\PizzaShop\obj\Debug\net7.0\refint\PizzaShop.dll
 D:\Project\PizzaShop\obj\Debug\net7.0\PizzaShop.pdb
 D:\Project\PizzaShop\obj\Debug\net7.0\PizzaShop.genruntimeconfig.cache
 D:\Project\PizzaShop\obj\Debug\net7.0\ref\PizzaShop.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\appsettings.Development.json
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\appsettings.json
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\PizzaShop.staticwebassets.runtime.json
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\PizzaShop.exe
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\PizzaShop.deps.json
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\PizzaShop.runtimeconfig.json
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\PizzaShop.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\PizzaShop.pdb
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\Humanizer.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Design.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Relational.Design.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\Microsoft.Extensions.DependencyModel.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\Mono.TextTemplating.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\Npgsql.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\Npgsql.EntityFrameworkCore.PostgreSQL.Design.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\bin\Debug\net7.0\System.CodeDom.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.csproj.AssemblyReference.cache
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.AssemblyInfoInputs.cache
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.AssemblyInfo.cs
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.csproj.CoreCompileInputs.cache
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.RazorAssemblyInfo.cache
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.RazorAssemblyInfo.cs
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\staticwebassets\msbuild.PizzaShop.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\staticwebassets\msbuild.build.PizzaShop.props
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\staticwebassets\msbuild.buildMultiTargeting.PizzaShop.props
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\staticwebassets\msbuild.buildTransitive.PizzaShop.props
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\staticwebassets.pack.json
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\staticwebassets.build.json
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\staticwebassets.development.json
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\scopedcss\bundle\PizzaShop.styles.css
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\scopedcss\projectbundle\PizzaShop.bundle.scp.css
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.csproj.CopyComplete
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\refint\PizzaShop.dll
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.pdb
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\PizzaShop.genruntimeconfig.cache
+C:\Users\MANISHA PATEL\Desktop\Tatvasoft\PizzaShop\obj\Debug\net7.0\ref\PizzaShop.dll
