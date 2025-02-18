@@ -34,6 +34,10 @@ public partial class User
     public string Address { get; set; } = null!;
 
     public int ZipCode { get; set; }
+    
+    // 🔹 Reset Password Fields
+    public string? ResetToken { get; set; }
+    public DateTime? ResetTokenExpiry { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

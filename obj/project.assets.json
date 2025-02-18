@@ -5963,11 +5963,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\PizzaShop\\PizzaShop.csproj",
+      "projectUniqueName": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop\\PizzaShop.csproj",
       "projectName": "PizzaShop",
-      "projectPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\PizzaShop\\PizzaShop.csproj",
+      "projectPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop\\PizzaShop.csproj",
       "packagesPath": "C:\\Users\\MANISHA PATEL\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\PizzaShop\\obj\\",
+      "outputPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\MANISHA PATEL\\AppData\\Roaming\\NuGet\\NuGet.Config",

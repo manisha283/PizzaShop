@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "RakrbsHPURoVnWnXChNwRNqrvLKcQobndnW4uXe4zJLfhODjQsqYIDmDLy81+Amslalr2czjf8wOKqQU/BBMgQ==",
+  "dgSpecHash": "dE857mzXd5y2mHGEOft2xucparQKcc6zC28fuJYM7AYYvKi+sIWv0mE2muNytrP1pFIQWHycGMQY2iKaKLBVVw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\PizzaShop\\PizzaShop.csproj",
+  "projectFilePath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop\\PizzaShop.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\MANISHA PATEL\\.nuget\\packages\\bouncycastle.cryptography\\2.5.0\\bouncycastle.cryptography.2.5.0.nupkg.sha512",
     "C:\\Users\\MANISHA PATEL\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
