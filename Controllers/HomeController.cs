@@ -1,15 +1,15 @@
 ﻿﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Runtime.Intrinsics.Arm;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PizzaShop.Models;
 using PizzaShop.Services;
 using PizzaShop.ViewModel;
-using System.Security.Cryptography;
-using System.Text;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Linq;
 
 namespace PizzaShop.Controllers;
 
@@ -18,20 +18,24 @@ public class HomeController : Controller
     private readonly ILogger<HomeController> _logger;
     private readonly PizzashopContext _context;
     private readonly IEmailService _emailService;
+    private readonly JwtService _jwtService;
 
-    public HomeController(ILogger<HomeController> logger, PizzashopContext context, IEmailService emailService)
+    public HomeController(ILogger<HomeController> logger, PizzashopContext context, IEmailService emailService, JwtService jwtService)
     {
         _logger = logger;
         _context = context;
         _emailService = emailService;
+        _jwtService =jwtService;
     }
+
 
     public IActionResult Login()
     {
-        if (Request.Cookies["emailCookie"] != null)
+        if(Request.Cookies["emailCookie"] != null)
         {
-            return RedirectToAction("Privacy");
+             return RedirectToAction("Privacy");
         }
+
         return View();
     }
 
@@ -43,21 +47,32 @@ public class HomeController : Controller
             return View(model);
         }
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-        
-        if (user != null && VerifyPassword(model.Password, user.Password))
+        CookieOptions options = new CookieOptions
         {
-            CookieOptions options = new CookieOptions { Expires = DateTime.Now.AddDays(15) };
+            Expires = DateTime.Now.AddDays(1), // Cookie expires in 1 days                      
+            HttpOnly = true, // Secure against JavaScript access
+            IsEssential = true
+        };
 
-            if (model.RememberMe)
-            {
-                Response.Cookies.Append("emailCookie", model.Email, options);
-            }
-            return RedirectToAction("Privacy");
+        var user = await _context.Users.Where(u => u.Email == model.Email).Select(x=> new{x.Email, x.Password, x.RoleId}).FirstOrDefaultAsync();      
+        // If "Remember Me" is checked, store in a cookie
+        if (model.RememberMe)
+        {                   
+            Response.Cookies.Append("emailCookie", model.Email, options);
         }
 
-        ModelState.AddModelError("", "Invalid login credentials");
-        return View(model);
+        
+        bool verified = BCrypt.Net.BCrypt.Verify(model.Password, user.Password);  
+        if(user != null && verified){
+            var role = _context.Roles.Where(u => u.Id == user.RoleId).FirstOrDefault();
+            var token = _jwtService.GenerateToken(model.Email,role.Name);
+
+            Response.Cookies.Append("authToken",token, options);
+            return RedirectToAction("MyProfile");
+        }
+        else{
+            return View(model);
+        }
     }
 
     public IActionResult ForgotPassword()
@@ -68,101 +83,66 @@ public class HomeController : Controller
     [HttpPost]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
     {
-        if (!ModelState.IsValid)
-        {
-            return View();
-        }
-
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-        if (user == null)
-        {
-            return RedirectToAction("ForgotPasswordConfirmation");
-        }
-
-        // Generate URL-safe Reset Token
-        var tokenBytes = RandomNumberGenerator.GetBytes(32);
-        var token = WebEncoders.Base64UrlEncode(tokenBytes);
-        
-        user.ResetToken = token;
-        user.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
-
-        _context.Users.Update(user);
-        await _context.SaveChangesAsync();
-
-        var resetLink = Url.Action("ResetPassword", "Home", new { token }, Request.Scheme);
-
-        string body = $@"<div>
-            <p>Please click <a href='{resetLink}'>here</a> to reset your password.</p>
-            <p><b>Note:</b> This link expires in 1 hour.</p>
+        var resetLink = Url.Action("ResetPassword","Home", new{email = model.Email},Request.Scheme);
+        string body = $@"<div style='background-color: #F2F2F2;'>
+            <div style='background-color: #0066A8; color: white; height: 90px; font-size: 40px; font-weight: 600; text-align: center; padding-top: 40px; margin-bottom: 0px;'>PIZZASHOP</div>
+            <div style='font-family:Verdana, Geneva, Tahoma, sans-serif; margin-top: 0px; font-size: 20px; padding: 10px;'>
+                <p>Pizza shop,</p>
+                <p>Please click <a href='{resetLink}'>here</a> for reset your account Password.</p>
+                <p>If you encounter any issues or have any question, please do not hesitate to contact our support team.</p>
+                <p><span style='color: orange;'>Important Note:</span> For security reasons, the link will expire in 24 hours. If you did not request a password reset, please ignore this email or contact our support team immediately.</p>
+            </div>
         </div>";
 
-        await _emailService.SendEmailAsync(user.Email, "Reset Password", body);
-        return RedirectToAction("ForgotPasswordConfirmation");
+        if(ModelState.IsValid){
+            await _emailService.SendEmailAsync(model.Email, "Reset Password", body);
+            return RedirectToAction("Privacy");
+        }
+        return View();
     }
 
-    public IActionResult ResetPassword(string token)
+    public IActionResult ResetPassword(string email)
     {
-        if (string.IsNullOrEmpty(token))
-        {
-            return BadRequest("Invalid password reset link.");
-        }
-
-        var model = new ResetPasswordViewModel { Token = token };
-        return View(model);
+        ViewBag.email = email;
+        return View();
     }
 
     [HttpPost]
-    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
-    {
-        if (!ModelState.IsValid)
+    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model){
+
+        if(!ModelState.IsValid){
+            return RedirectToAction("Privacy");
+        }
+
+        var user = await _context.Users.Where(u => u.Email == model.Email).FirstOrDefaultAsync();
+        if(user == null)
         {
+            ModelState.AddModelError("","Email not found");
+        }
+
+        if(model.NewPassword == model.ConfirmPassword)
+        {
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(model.ConfirmPassword);
+            user.Password = passwordHash;
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Login");
+        }
+        else{
             return View(model);
         }
-
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.ResetToken == model.Token);
-        if (user == null || user.ResetTokenExpiry == null || user.ResetTokenExpiry < DateTime.UtcNow)
-        {
-            ModelState.AddModelError("", "Invalid or expired reset token.");
-            return View(model);
-        }
-
-        user.Password = HashPassword(model.NewPassword);
-        user.ResetToken = null;
-        user.ResetTokenExpiry = null;
-
-        _context.Users.Update(user);
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction("ResetPasswordConfirmation");
     }
 
-    private static string HashPassword(string password)
-    {
-        byte[] salt = RandomNumberGenerator.GetBytes(16);
-        using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000, HashAlgorithmName.SHA256))
-        {
-            byte[] hash = pbkdf2.GetBytes(32);
-            return $"{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
-        }
-    }
-
-    private static bool VerifyPassword(string enteredPassword, string storedHash)
-    {
-        string[] parts = storedHash.Split('.');
-        if (parts.Length != 2) return false;
-
-        byte[] salt = Convert.FromBase64String(parts[0]);
-        byte[] storedHashBytes = Convert.FromBase64String(parts[1]);
-
-        using (var pbkdf2 = new Rfc2898DeriveBytes(enteredPassword, salt, 100000, HashAlgorithmName.SHA256))
-        {
-            byte[] enteredHashBytes = pbkdf2.GetBytes(32);
-            return enteredHashBytes.SequenceEqual(storedHashBytes);
-        }
-    }
-
+    [Authorize(Roles = "admin")]
     public IActionResult Privacy()
     {
         return View();
     }
+
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
 }

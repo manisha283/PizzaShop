@@ -1,9 +1,9 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PizzaShop.Models;
 using PizzaShop.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,25 +12,41 @@ var conn = builder.Configuration.GetConnectionString("PizzashopDbConnection");
 builder.Services.AddDbContext<PizzashopContext>(q => q.UseNpgsql(conn));
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddTransient<JwtService>();
 builder.Services.Configure<EmailSettings>
 (builder.Configuration.GetSection("SmtpSettings"));
 
-var builder = WebApplication.CreateBuilder(args);
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+builder.Services.ConfigureApplicationCookie(options => options.LoginPath = "/Home/Login");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                // Extract token from the "JwtToken" cookie
+                var token = context.Request.Cookies["authToken"];
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Token = token;
+                }
+                return Task.CompletedTask;
+            }
+        };
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]))
+            ValidIssuer = builder.Configuration["JwtConfig:Issuer"],
+            ValidAudience = builder.Configuration["JwtConfig:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtConfig:Key"]))
         };
     });
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();

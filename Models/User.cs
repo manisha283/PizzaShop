@@ -34,10 +34,6 @@ public partial class User
     public string Address { get; set; } = null!;
 
     public int ZipCode { get; set; }
-    
-    // 🔹 Reset Password Fields
-    public string? ResetToken { get; set; }
-    public DateTime? ResetTokenExpiry { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -48,6 +44,10 @@ public partial class User
     public long? UpdatedBy { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public string? Resettoken { get; set; }
+
+    public DateTime? Resettokenexpiry { get; set; }
 
     public virtual ICollection<Category> CategoryCreatedByNavigations { get; set; } = new List<Category>();
 
