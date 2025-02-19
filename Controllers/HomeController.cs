@@ -133,11 +133,79 @@ public class HomeController : Controller
         }
     }
 
-    [Authorize(Roles = "admin")]
+    
     public IActionResult Privacy()
     {
         return View();
     }
+
+     public IActionResult MyProfile()
+    {
+        int userId = 1; // Assume logged-in user ID (replace with authentication logic)
+
+        var user = await _context.UserProfiles.FindAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var model = new MyProfileViewModel
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            UserName = user.UserName,
+            Phone = user.Phone,
+            Country = user.Country,
+            State = user.State,
+            City = user.City,
+            Address = user.Address,
+            ZipCode = user.ZipCode,
+            ProfileImageUrl = user.ProfileImageUrl
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> MyProfile(MyProfileViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("MyProfile", model);
+        }
+
+        var user = await _context.UserProfiles.FindAsync(model.Id);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        user.FirstName = model.FirstName;
+        user.LastName = model.LastName;
+        user.UserName = model.UserName;
+        user.Phone = model.Phone;
+        user.Country = model.Country;
+        user.State = model.State;
+        user.City = model.City;
+        user.Address = model.Address;
+        user.ZipCode = model.ZipCode;
+
+        _context.UserProfiles.Update(user);
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Profile updated successfully!";
+        return RedirectToAction("MyProfile");
+    }
+
+    public IActionResult ChangePassword()
+    {
+        return View();
+    }
+
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

@@ -271,6 +271,11 @@ nav{
     border-top-width: 0px;
 }
 
+/*My Profile*/
+.dropdown-item{
+    padding: 0.25rem;
+}
+
 
 
 
