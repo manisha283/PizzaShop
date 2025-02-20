@@ -60,17 +60,27 @@ public class DashboardController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> MyProfile(MyProfileViewModel model)
     {
          if(!ModelState.IsValid){
+            foreach (var key in ModelState.Keys)
+            {
+                var errors = ModelState[key].Errors;
+                foreach (var error in errors)
+                {
+                    Console.WriteLine($"Key: {key}, Error: {error.ErrorMessage}");
+                }
+            }
             return View(model);
         }
 
         // email is fetched from the token
         var token = Request.Cookies["authToken"];
         var email = _jwtService.GetClaimValue(token,"email");
+        model.Email = email;
 
-        var user = await _context.Users.FindAsync(model.Email);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
 
         if (user == null)
         {

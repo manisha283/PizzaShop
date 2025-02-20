@@ -1,0 +1,64 @@
+@model List<YourProjectNamespace.Models.User>
+@{
+    ViewData["Title"] = "Users";
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+    string searchQuery = ViewBag.Search ?? "";
+}
+
+<div class="container mt-3">
+    <h1 class="blue-text">Users</h1>
+
+    <!-- Search Form -->
+    <form method="get" class="d-flex mb-3">
+        <input type="text" name="search" class="form-control me-2" placeholder="Search..." value="@searchQuery">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <!-- User Table -->
+    <div class="table-responsive bg-white p-3">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.Name</td>
+                        <td>@user.Email</td>
+                        <td>@user.Phone</td>
+                        <td>@user.Role</td>
+                        <td>
+                            <span class="@(user.Status == "Active" ? "bg-active" : "bg-inactive")">@user.Status</span>
+                        </td>
+                        <td>
+                            <a href="/Users/Edit/@user.Id" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="/Users/Delete/@user.Id" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-end">
+        @if (currentPage > 1)
+        {
+            <a href="?page=@(currentPage - 1)&search=@searchQuery" class="btn btn-light">Previous</a>
+        }
+        <span class="px-3">Page @currentPage of @totalPages</span>
+        @if (currentPage < totalPages)
+        {
+            <a href="?page=@(currentPage + 1)&search=@searchQuery" class="btn btn-light">Next</a>
+        }
+    </div>
+</div>
