@@ -1,12 +1,8 @@
 ﻿﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.Runtime.Intrinsics.Arm;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using PizzaShop.Models;
 using PizzaShop.Services;
 using PizzaShop.ViewModel;
@@ -33,7 +29,7 @@ public class HomeController : Controller
     {
         if(Request.Cookies["emailCookie"] != null)
         {
-             return RedirectToAction("Privacy");
+             return RedirectToAction("MyProfile","Dashboard");
         }
 
         return View();
@@ -60,7 +56,6 @@ public class HomeController : Controller
         {                   
             Response.Cookies.Append("emailCookie", model.Email, options);
         }
-
         
         bool verified = BCrypt.Net.BCrypt.Verify(model.Password, user.Password);  
         if(user != null && verified){
@@ -68,7 +63,7 @@ public class HomeController : Controller
             var token = _jwtService.GenerateToken(model.Email,role.Name);
 
             Response.Cookies.Append("authToken",token, options);
-            return RedirectToAction("MyProfile");
+            return RedirectToAction("MyProfile","Dashboard");
         }
         else{
             return View(model);
@@ -133,79 +128,11 @@ public class HomeController : Controller
         }
     }
 
-    
+    [Authorize(Roles = "admin")]
     public IActionResult Privacy()
     {
         return View();
     }
-
-     public IActionResult MyProfile()
-    {
-        int userId = 1; // Assume logged-in user ID (replace with authentication logic)
-
-        var user = await _context.UserProfiles.FindAsync(userId);
-
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        var model = new MyProfileViewModel
-        {
-            Id = user.Id,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Email = user.Email,
-            UserName = user.UserName,
-            Phone = user.Phone,
-            Country = user.Country,
-            State = user.State,
-            City = user.City,
-            Address = user.Address,
-            ZipCode = user.ZipCode,
-            ProfileImageUrl = user.ProfileImageUrl
-        };
-
-        return View(model);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> MyProfile(MyProfileViewModel model)
-    {
-        if (!ModelState.IsValid)
-        {
-            return View("MyProfile", model);
-        }
-
-        var user = await _context.UserProfiles.FindAsync(model.Id);
-
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        user.FirstName = model.FirstName;
-        user.LastName = model.LastName;
-        user.UserName = model.UserName;
-        user.Phone = model.Phone;
-        user.Country = model.Country;
-        user.State = model.State;
-        user.City = model.City;
-        user.Address = model.Address;
-        user.ZipCode = model.ZipCode;
-
-        _context.UserProfiles.Update(user);
-        await _context.SaveChangesAsync();
-
-        TempData["SuccessMessage"] = "Profile updated successfully!";
-        return RedirectToAction("MyProfile");
-    }
-
-    public IActionResult ChangePassword()
-    {
-        return View();
-    }
-
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
