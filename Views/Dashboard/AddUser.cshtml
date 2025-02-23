@@ -1,0 +1,116 @@
+@model PizzaShop.ViewModel.AddUserViewModel;
+
+@{
+    ViewData["Title"] = "Add User";
+    Layout = "_SidebarLayout";
+}
+
+<!-- User heading, search and add button -->
+<div class="d-flex justify-content-between align-items-center users mb-3">
+    <div>
+        <h1 class="blue-text"> Add New User</h1>
+    </div>
+    <div>
+        <a href="users.html" class="btn btn-white">
+            <img src="images/icons/chevron-left-blue.svg" alt="">
+            <span>Back</span>
+        </a>  
+    </div>
+</div>
+
+<!-- Form -->
+<div class="row bg-white px-3 py-4 mx-0">
+
+    <!-- First row -->                       
+    <div class="col-12 col-sm-6 form-floating mb-3">
+        <input asp-for="FirstName" type="text" class="form-control" id="firstName" placeholder="">
+        <label for="firstName">First Name</label>
+    </div>
+    <div class="col-12 col-sm-6 form-floating mb-3">
+        <input asp-for="LastName" type="text" class="form-control" id="lastName" placeholder="">
+        <label for="lastName">Last Name</label>
+    </div>
+    <div class="col-12 col-sm-6 form-floating mb-3">
+        <input asp-for="UserName" type="text" class="form-control" id="userName" placeholder="">
+        <label for="firstName">User Name</label>
+    </div>
+    <div class="col-12 col-sm-6 form-floating mb-3">
+        <select class="form-select" aria-label="Default select example" id="role">
+            <option selected>Select Role</option>
+            <option value="1">One</option>
+            <option value="2">Two</option>
+            <option value="3">Three</option>
+        </select>
+        <label for="role">Role</label>
+    </div>
+    <div class="col-12 col-sm-6 form-floating mb-3">
+        <input asp-for="Email" type="email" class="form-control" id="floatingInput" placeholder="">
+        <label for="floatingInput">Email address</label>
+    </div>
+    <div class="col-12 col-sm-6 form-floating mb-3">
+        <input asp-for="Password" type="password" class="form-control" id="floatingPassword" placeholder="">
+        <label for="floatingPassword">Password</label>
+    </div>
+
+    <!-- Browse files row-->
+    <div class="col-12 mb-3 browse">
+        <input type="file" id="upload" hidden>
+        <label for="upload" class="w-100">
+            <div class="d-flex justify-content-center flex-column mt-3">
+                <img src="images/icons/browse.svg" alt="" height="35px">
+                <div class="d-flex justify-content-center">Browse Files</div> 
+            </div> 
+        </label>
+    </div>
+
+    <!-- Address blocks-->
+    <div class="col-12 col-sm-4 form-floating mb-3">
+        <select asp-for="@Model.CountryId" class="form-select" aria-label="" id="Countries">
+            <option selected value="">Select Country</option>
+            @foreach (var country in ViewBag.Countries)
+            {
+                <option value="@country.Id"> @country.Name</option>
+            }
+        </select>
+        <label for="country">Country</label>
+    </div>
+    <div class="col-12 col-sm-4 form-floating mb-3">
+        <select asp-for="@Model.StateId" class="form-select" aria-label="" id="States">
+            <option selected value="">Select State</option>
+            @foreach (var state in ViewBag.States){
+                <option value="@state.Id"> @state.Name</option>
+            }
+        </select>
+        <label for="country">State</label>
+    </div>
+    <div class="col-12 col-sm-4 form-floating mb-3">
+        <select asp-for="@Model.CityId" class="form-select" aria-label="" id="Cities">
+            <option selected value="">Select City</option>
+            @foreach (var city in ViewBag.Cities){
+                <option value="@city.Id"> @city.Name</option>
+            }
+        </select>
+        <label for="country">City</label>
+    </div>
+    <div class="col-12 col-sm-4 form-floating mb-3">
+        <input asp-for="ZipCode" type="text" class="form-control" id="zipCode" placeholder="">
+        <label for="floatingPassword">Zip Code</label>
+    </div>
+    <div class="col-12 col-sm-4 form-floating mb-3">
+        <input asp-for="Address" type="text" class="form-control" id="address" placeholder="">
+        <label for="floatingPassword">Address</label>
+    </div>
+    <div class="col-12 col-sm-4 form-floating mb-3">
+        <input asp-for="Phone" type="text" class="form-control" id="phone" placeholder="">
+        <label for="floatingPassword">Phone</label>
+    </div>
+
+    <div>
+        <button class="btn btn-blue">
+            Create User
+        </button>
+        <button class="btn btn-white">
+            Cancel
+        </button>
+    </div>
+</div>

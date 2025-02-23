@@ -179,4 +179,82 @@ public class DashboardController : Controller
         return Json(new SelectList(cities, "Id", "Name"));
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Users(string? search, int pageNumber = 1, int pageSize = 5)
+    {
+        var query = _context.Users.AsQueryable();
+
+        // Apply search filter
+        if (!string.IsNullOrEmpty(search))
+        {
+            query = query.Where(u => u.FirstName.Contains(search)|| u.LastName.Contains(search) || u.Email.Contains(search));
+        }
+
+        // Get total record count before pagination
+        int totalRecords = await query.CountAsync();
+
+        // Apply pagination
+        var users = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var viewModel = new UsersViewModel
+        {
+            Users = users,
+            SearchTerm = search,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalRecords = totalRecords
+        };
+
+        return View(viewModel);
+    }
+
+    public IActionResult AddUser(){
+        return View();
+    }
+
+    // [HttpPost]
+    // public async Task<IActionResult> AddUser(AddUserViewModel model)
+    // {
+    //     if (ModelState.IsValid)
+    //     {
+    //         // Map ViewModel to User Model
+    //         var user = new User
+    //         {
+    //             FirstName = model.FirstName,
+    //             LastName = model.LastName,
+    //             UserName = model.UserName,
+    //             Email = model.Email,
+    //             Password = model.Password, // Encrypt this before saving
+    //             Role = model.Role,
+    //             Country = model.Country,
+    //             State = model.State,
+    //             City = model.City,
+    //             ZipCode = model.ZipCode,
+    //             Address = model.Address,
+    //             Phone = model.Phone
+    //         };
+
+    //         // Handle Profile Image Upload (if any)
+    //         if (model.ProfileImage != null)
+    //         {
+    //             var filePath = Path.Combine("wwwroot/uploads", model.ProfileImage.FileName);
+    //             using (var stream = new FileStream(filePath, FileMode.Create))
+    //             {
+    //                 await model.ProfileImage.CopyToAsync(stream);
+    //             }
+    //             user.ProfileImagePath = "/uploads/" + model.ProfileImage.FileName;
+    //         }
+
+    //         // Add user to database
+    //         _context.Users.Add(user);
+    //         await _context.SaveChangesAsync();
+
+    //         return RedirectToAction("UserList"); // Redirect after adding
+    //     }
+
+    //     return View(model); // Return form with validation errors
+    // }
 }

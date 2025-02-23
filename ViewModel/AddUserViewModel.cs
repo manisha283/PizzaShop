@@ -3,7 +3,7 @@ using PizzaShop.Models;
 
 namespace PizzaShop.ViewModel
 {
-    public class MyProfileViewModel
+    public class AddUserViewModel
     {
         // [Required(ErrorMessage = "First Name is required")]
         // [StringLength(50, ErrorMessage = "First Name cannot exceed 50 characters")]
@@ -17,12 +17,16 @@ namespace PizzaShop.ViewModel
         // [StringLength(50, ErrorMessage = "User Name cannot exceed 50 characters")]
         public string UserName { get; set; } = null!;
 
-    
-        public long Phone { get; set; } 
+        public string? Role { get; set; }
 
         // [Required(ErrorMessage = "Email is required")]
         // [EmailAddress(ErrorMessage = "Invalid email format")]
         public string? Email { get; set; } = null!;
+
+        // [Required(AllowEmptyStrings = false, ErrorMessage = "Password is required")]    
+        // [DataType(DataType.Password)]    
+        // [MinLength(8, ErrorMessage = "Minimum 8 character required")]    
+        public string? Password { get; set; }
 
         // [Required(ErrorMessage = "Address is required")]
         // [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters")]
@@ -31,6 +35,8 @@ namespace PizzaShop.ViewModel
         // [Required(ErrorMessage = "Zip Code is required")]
         // [RegularExpression(@"^\d{5,6}$", ErrorMessage = "Invalid Zip Code")]
         public int ZipCode { get; set; }
+
+        public long Phone { get; set; } 
 
         public string ProfileImageUrl { get; set; } = "~/images/Default_pfp.svg.png";
 
@@ -47,7 +53,6 @@ namespace PizzaShop.ViewModel
         // [Required(ErrorMessage = "City is required")]
         public List<City> Cities { get; set; }  = new List<City>();
         
-        public string? Role { get; set; } =null!;
     }
 }
 

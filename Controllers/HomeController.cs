@@ -29,7 +29,7 @@ public class HomeController : Controller
     {
         if(Request.Cookies["emailCookie"] != null)
         {
-             return RedirectToAction("MyProfile","Dashboard");
+            return RedirectToAction("AddUser","Dashboard");
         }
 
         return View();
@@ -63,7 +63,7 @@ public class HomeController : Controller
             var token = _jwtService.GenerateToken(model.Email,role.Name);
 
             Response.Cookies.Append("authToken",token, options);
-            return RedirectToAction("MyProfile","Dashboard");
+            return RedirectToAction("AddUser","Dashboard");
         }
         else{
             return View(model);

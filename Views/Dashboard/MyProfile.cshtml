@@ -165,3 +165,113 @@
     });
 </script>
 
+@* @model PizzaShop.ViewModel.AddUserViewModel;
+
+@{
+    ViewData["Title"] = "Add User";
+    Layout = "_SidebarLayout";
+}
+
+<!-- User heading, search and add button -->
+<div class="d-flex justify-content-between align-items-center users mb-3">
+    <div>
+        <h1 class="blue-text"> Add New User</h1>
+    </div>
+    <div>
+        <a href="users.html" class="btn btn-white">
+            <img src="images/icons/chevron-left-blue.svg" alt="">
+            <span>Back</span>
+        </a>  
+    </div>
+</div>
+
+<!-- Form -->
+<form method="post" asp-action="AddUser" asp-controller="User" enctype="multipart/form-data">
+    <div class="row bg-white px-3 py-4 mx-0">
+        <!-- First row -->                       
+        <div class="col-12 col-sm-6 form-floating mb-3">
+            <input type="text" class="form-control" asp-for="FirstName">
+            <label asp-for="FirstName">First Name</label>
+        </div>
+        <div class="col-12 col-sm-6 form-floating mb-3">
+            <input type="text" class="form-control" asp-for="LastName">
+            <label asp-for="LastName">Last Name</label>
+        </div>
+        <div class="col-12 col-sm-6 form-floating mb-3">
+            <input type="text" class="form-control" asp-for="UserName">
+            <label asp-for="UserName">User Name</label>
+        </div>
+        <div class="col-12 col-sm-6 form-floating mb-3">
+            <select class="form-select" asp-for="Role">
+                <option selected>Select Role</option>
+                <option value="Admin">Admin</option>
+                <option value="User">User</option>
+                <option value="Manager">Manager</option>
+            </select>
+            <label asp-for="Role">Role</label>
+        </div>
+        <div class="col-12 col-sm-6 form-floating mb-3">
+            <input type="email" class="form-control" asp-for="Email">
+            <label asp-for="Email">Email address</label>
+        </div>
+        <div class="col-12 col-sm-6 form-floating mb-3">
+            <input type="password" class="form-control" asp-for="Password">
+            <label asp-for="Password">Password</label>
+        </div>
+
+        <!-- Browse files row-->
+        <div class="col-12 mb-3 browse">
+            <input type="file" id="upload" asp-for="ProfileImage" hidden>
+            <label for="upload" class="w-100">
+                <div class="d-flex justify-content-center flex-column mt-3">
+                    <img src="images/icons/browse.svg" alt="" height="35px">
+                    <div class="d-flex justify-content-center">Browse Files</div> 
+                </div> 
+            </label>
+        </div>
+
+        <!-- Address blocks-->
+        <div class="col-12 col-sm-4 form-floating mb-3">
+            <select class="form-select" asp-for="Country">
+                <option selected>India</option>
+                <option value="USA">USA</option>
+                <option value="Canada">Canada</option>
+            </select>
+            <label asp-for="Country">Country</label>
+        </div>
+        <div class="col-12 col-sm-4 form-floating mb-3">
+            <select class="form-select" asp-for="State">
+                <option selected>Select State</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="Maharashtra">Maharashtra</option>
+            </select>
+            <label asp-for="State">State</label>
+        </div>
+        <div class="col-12 col-sm-4 form-floating mb-3">
+            <select class="form-select" asp-for="City">
+                <option selected>Select City</option>
+                <option value="Ahmedabad">Ahmedabad</option>
+                <option value="Mumbai">Mumbai</option>
+            </select>
+            <label asp-for="City">City</label>
+        </div>
+        <div class="col-12 col-sm-4 form-floating mb-3">
+            <input type="text" class="form-control" asp-for="ZipCode">
+            <label asp-for="ZipCode">Zip Code</label>
+        </div>
+        <div class="col-12 col-sm-4 form-floating mb-3">
+            <input type="text" class="form-control" asp-for="Address">
+            <label asp-for="Address">Address</label>
+        </div>
+        <div class="col-12 col-sm-4 form-floating mb-3">
+            <input type="text" class="form-control" asp-for="Phone">
+            <label asp-for="Phone">Phone</label>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-blue">Create User</button>
+            <button type="reset" class="btn btn-white">Cancel</button>
+        </div>
+    </div>
+</form>
+ *@
