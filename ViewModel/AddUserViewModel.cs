@@ -52,7 +52,5 @@ namespace PizzaShop.ViewModel
 
         // [Required(ErrorMessage = "City is required")]
         public List<City> Cities { get; set; }  = new List<City>();
-        
     }
 }
-

@@ -59,22 +59,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Check database connection at startup
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<PizzashopContext>();
-    try
-    {
-        dbContext.Database.OpenConnection();
-        Console.WriteLine("✅ Database connection successful!");
-        dbContext.Database.CloseConnection();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"❌ Database connection failed: {ex.Message}");
-    }
-}
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using MailKit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace PizzaShop.Controllers;
 
@@ -70,21 +71,12 @@ public class DashboardController : Controller
     {
 
         if(!ModelState.IsValid){
-            // foreach (var key in ModelState.Keys)
-            // {
-            //     var errors = ModelState[key].Errors;
-            //     foreach (var error in errors)
-            //     {
-            //         Console.WriteLine($"Key: {key}, Error: {error.ErrorMessage}");
-            //     }
-            // }
             return View(model);
         }
 
         // email is fetched from the token
         var token = Request.Cookies["authToken"];
         var email = _jwtService.GetClaimValue(token,"email");
-        // model.Email = email;
 
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
 
@@ -97,6 +89,24 @@ public class DashboardController : Controller
         user.CityId = model.CityId;
         user.Address = model.Address;
         user.ZipCode = model.ZipCode;
+
+        if (model.image != null)
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+
+            //create folder if not exist
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            string fileName = $"{Guid.NewGuid()}_{model.image.FileName}";
+            string fileNameWithPath = Path.Combine(path, fileName);
+
+            using (var stream = new FileStream(fileNameWithPath, FileMode.Create))
+            {
+                model.image.CopyTo(stream);
+            }
+            user.ProfileImg = $"/uploads/{fileName}";
+        }
 
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
@@ -166,6 +176,7 @@ public class DashboardController : Controller
         var countries = _context.Countries.ToList();
         return Json(new SelectList(countries, "Id", "Name"));
     }
+
     [HttpGet]
     public IActionResult GetStates(int countryId)
     {
@@ -179,82 +190,62 @@ public class DashboardController : Controller
         return Json(new SelectList(cities, "Id", "Name"));
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Users(string? search, int pageNumber = 1, int pageSize = 5)
-    {
-        var query = _context.Users.AsQueryable();
+    public IActionResult UsersList(){
 
-        // Apply search filter
-        if (!string.IsNullOrEmpty(search))
-        {
-            query = query.Where(u => u.FirstName.Contains(search)|| u.LastName.Contains(search) || u.Email.Contains(search));
-        }
+        var allUsers = _context.Users.Include(x => x.Role).Select(u => new UserInfoViewModel{
+            FirstName = u.FirstName,
+            LastName = u.LastName,
+            Email = u.Email,
+            Phone = u.Phone,
+            Role = u.Role.Name ,
+            ProfileImageUrl = u.ProfileImg,
+            Status =u.IsActive,
+        }).ToList();
 
-        // Get total record count before pagination
-        int totalRecords = await query.CountAsync();
+        UsersListViewModel model = new UsersListViewModel();
+        model.User = allUsers;
 
-        // Apply pagination
-        var users = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        var viewModel = new UsersViewModel
-        {
-            Users = users,
-            SearchTerm = search,
-            PageNumber = pageNumber,
-            PageSize = pageSize,
-            TotalRecords = totalRecords
-        };
-
-        return View(viewModel);
+        return View(model);
     }
 
+    [HttpGet]
     public IActionResult AddUser(){
+        ViewBag.roles = _context.Roles.ToList();
+        ViewBag.countries = _context.Countries.ToList();
+        ViewBag.states = _context.States.ToList();
+        ViewBag.cities = _context.Cities.ToList();
         return View();
     }
 
-    // [HttpPost]
-    // public async Task<IActionResult> AddUser(AddUserViewModel model)
-    // {
-    //     if (ModelState.IsValid)
-    //     {
-    //         // Map ViewModel to User Model
-    //         var user = new User
-    //         {
-    //             FirstName = model.FirstName,
-    //             LastName = model.LastName,
-    //             UserName = model.UserName,
-    //             Email = model.Email,
-    //             Password = model.Password, // Encrypt this before saving
-    //             Role = model.Role,
-    //             Country = model.Country,
-    //             State = model.State,
-    //             City = model.City,
-    //             ZipCode = model.ZipCode,
-    //             Address = model.Address,
-    //             Phone = model.Phone
-    //         };
+    [HttpPost]
+    public async Task<IActionResult> AddUser(MyProfileViewModel model)
+    {
 
-    //         // Handle Profile Image Upload (if any)
-    //         if (model.ProfileImage != null)
-    //         {
-    //             var filePath = Path.Combine("wwwroot/uploads", model.ProfileImage.FileName);
-    //             using (var stream = new FileStream(filePath, FileMode.Create))
-    //             {
-    //                 await model.ProfileImage.CopyToAsync(stream);
-    //             }
-    //             user.ProfileImagePath = "/uploads/" + model.ProfileImage.FileName;
-    //         }
+        if(!ModelState.IsValid){
+            return View(model);
+        }
 
-    //         // Add user to database
-    //         _context.Users.Add(user);
-    //         await _context.SaveChangesAsync();
+        // email is fetched from the token
+        var token = Request.Cookies["authToken"];
+        var email = _jwtService.GetClaimValue(token,"email");
 
-    //         return RedirectToAction("UserList"); // Redirect after adding
-    //     }
+        var user = await _context.Users.FirstOrDefaultAsync();
 
-    //     return View(model); // Return form with validation errors
-    // }
+        user.FirstName = model.FirstName;
+        user.LastName = model.LastName;
+        user.Username = model.UserName;
+        user.Phone = model.Phone;
+        user.CountryId = model.CountryId;
+        user.StateId = model.StateId;
+        user.CityId = model.CityId;
+        user.Address = model.Address;
+        user.ZipCode = model.ZipCode;
+
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Profile updated successfully!";
+        return RedirectToAction("ChangePassword", "Dashboard");
+    }
+
 }

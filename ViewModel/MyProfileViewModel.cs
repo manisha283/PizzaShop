@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using PizzaShop.Models;
 
-namespace PizzaShop.ViewModel
-{
+namespace PizzaShop.ViewModel{
     public class MyProfileViewModel
     {
         // [Required(ErrorMessage = "First Name is required")]
@@ -17,7 +16,6 @@ namespace PizzaShop.ViewModel
         // [StringLength(50, ErrorMessage = "User Name cannot exceed 50 characters")]
         public string UserName { get; set; } = null!;
 
-    
         public long Phone { get; set; } 
 
         // [Required(ErrorMessage = "Email is required")]
@@ -34,6 +32,7 @@ namespace PizzaShop.ViewModel
 
         public string ProfileImageUrl { get; set; } = "~/images/Default_pfp.svg.png";
 
+        public IFormFile? image {get; set;} = null!;
         public long CountryId {get; set;}
         public long StateId {get; set;}
         public long CityId {get; set;}
@@ -48,6 +47,8 @@ namespace PizzaShop.ViewModel
         public List<City> Cities { get; set; }  = new List<City>();
         
         public string? Role { get; set; } =null!;
+        public List<Role> Roles { get; set; } = new List<Role>();
     }
 }
+
 
