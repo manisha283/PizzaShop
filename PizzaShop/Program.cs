@@ -17,6 +17,10 @@ builder.Services.AddTransient<JwtService>();
 builder.Services.Configure<EmailSettings>
 (builder.Configuration.GetSection("SmtpSettings"));
 
+// Register repositories & services
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 builder.Services.ConfigureApplicationCookie(options => options.LoginPath = "/Home/Login");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

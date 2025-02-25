@@ -1,7 +1,7 @@
 using BusinessLogicLayer.Interfaces;
 using DataAccessLayer.Models;
 
-namespace BusinessLogicLayer.Implementation;
+namespace BusinessLogicLayer.Services;
 
 public class HomeService : IHomeService
 {
