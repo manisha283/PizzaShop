@@ -87,25 +87,25 @@ namespace PizzaShop.Controllers
 
 #region Edit User
 
-        [HttpGet]
-        public IActionResult EditUser()
-        {
-            var user =  _userService.GetUserByIdAsync(id);
-            if (user == null) return NotFound();
+        // [HttpGet]
+        // public IActionResult EditUser()
+        // {
+        //     var user =  _userService.GetUserByIdAsync(id);
+        //     if (user == null) return NotFound();
 
-            return View(user);
-        }
+        //     return View(user);
+        // }
 
-        [HttpPost]
-        public async Task<IActionResult> EditUser(User user)
-        {
-            if (!ModelState.IsValid) return View(user);
+        // [HttpPost]
+        // public async Task<IActionResult> EditUser(User user)
+        // {
+        //     if (!ModelState.IsValid) return View(user);
 
-            bool success = await _userService.UpdateUserAsync(user);
-            if (success) TempData["SuccessMessage"] = "User updated successfully!";
+        //     bool success = await _userService.UpdateUserAsync(user);
+        //     if (success) TempData["SuccessMessage"] = "User updated successfully!";
 
-            return RedirectToAction("UsersList");
-        }
+        //     return RedirectToAction("UsersList");
+        // }
 #endregion
 
         // public async Task<IActionResult> DeleteUser(int id)
