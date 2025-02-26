@@ -51,7 +51,7 @@
                     <span class="@(user.Status==true?"bg-active":"bg-inactive")">@(user.Status==true?"Active":"Inactive")</span> 
                 </td>
                 <td>
-                    <a href="edit-user.html" class="btn">
+                    <a asp-action="EditUser" asp-controller="ManageUsers" class="btn">
                         <img src="~/images/icons/edit.svg" alt=""/>
                     </a>
                     

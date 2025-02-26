@@ -31,7 +31,6 @@ namespace PizzaShop.Controllers
 
 /*---------------------------Country State City---------------------------------------------
 ---------------------------------------------------------------------------------------*/
-
 #region Country, state and City
 [HttpGet]
     public IActionResult GetCountries()
@@ -62,7 +61,10 @@ namespace PizzaShop.Controllers
     // }
 #endregion
 
-
+/*---------------------------Add User---------------------------------------------
+---------------------------------------------------------------------------------------*/
+#region Add user
+        [HttpGet]
         public async Task<IActionResult> AddUser()
         {
             var model = await _userService.GetAddUser();
@@ -81,25 +83,30 @@ namespace PizzaShop.Controllers
 
             return RedirectToAction("UsersList");
         }
+#endregion
 
-        // public async Task<IActionResult> EditUser(int id)
-        // {
-        //     var user = await _userService.GetUserByIdAsync(id);
-        //     if (user == null) return NotFound();
+#region Edit User
 
-        //     return View(user);
-        // }
+        [HttpGet]
+        public IActionResult EditUser()
+        {
+            var user =  _userService.GetUserByIdAsync(id);
+            if (user == null) return NotFound();
 
-        // [HttpPost]
-        // public async Task<IActionResult> EditUser(User user)
-        // {
-        //     if (!ModelState.IsValid) return View(user);
+            return View(user);
+        }
 
-        //     bool success = await _userService.UpdateUserAsync(user);
-        //     if (success) TempData["SuccessMessage"] = "User updated successfully!";
+        [HttpPost]
+        public async Task<IActionResult> EditUser(User user)
+        {
+            if (!ModelState.IsValid) return View(user);
 
-        //     return RedirectToAction("UsersList");
-        // }
+            bool success = await _userService.UpdateUserAsync(user);
+            if (success) TempData["SuccessMessage"] = "User updated successfully!";
+
+            return RedirectToAction("UsersList");
+        }
+#endregion
 
         // public async Task<IActionResult> DeleteUser(int id)
         // {
