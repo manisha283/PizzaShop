@@ -1,6 +1,6 @@
 namespace DataAccessLayer.ViewModels;
 
-public class Pagination
+public class PaginationViewModel
 {
     public int TotalPages { get; set; }
     public int CurrentPage { get; set; }

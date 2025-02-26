@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
-using DataAccessLayer.ViewModel;
+using DataAccessLayer.ViewModels;
 using DataAccessLayer.Models;
-using DataAccessLayer.Services;
+using DataAccessLayer.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccessLayer.Repositories;
+namespace DataAccessLayer.Implementation;
 public class HomeRepository : IHomeRepository
 {
     private readonly PizzaShopContext _context;

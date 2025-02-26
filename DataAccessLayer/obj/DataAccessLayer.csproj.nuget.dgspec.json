@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\DataAccessLayer.csproj": {}
+    "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\DataAccessLayer.csproj": {}
   },
   "projects": {
-    "c:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\DataAccessLayer.csproj": {
+    "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\DataAccessLayer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\DataAccessLayer.csproj",
+        "projectUniqueName": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\DataAccessLayer.csproj",
         "projectName": "DataAccessLayer",
-        "projectPath": "c:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\DataAccessLayer.csproj",
+        "projectPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\DataAccessLayer.csproj",
         "packagesPath": "C:\\Users\\MANISHA PATEL\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\obj\\",
+        "outputPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\MANISHA PATEL\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -44,10 +44,6 @@
               "target": "Package",
               "version": "[2.3.0, )"
             },
-            "Microsoft.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[7.0.20, )"
-            },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
@@ -71,10 +67,6 @@
             "Npgsql.EntityFrameworkCore.PostgreSQL.Design": {
               "target": "Package",
               "version": "[1.1.0, )"
-            },
-            "System.Linq.Expressions": {
-              "target": "Package",
-              "version": "[4.3.0, )"
             }
           },
           "imports": [

@@ -1,28 +1,35 @@
+using DataAccessLayer.ViewModels;
 using BusinessLogicLayer.Interfaces;
-using BusinessLogicLayer.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
+using BusinessLogicLayer.Helpers;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace PizzaShop.Controllers
 {
     public class ProfileController : Controller
     {
-        private readonly IUserService _userService;
-        private readonly IJwtService _jwtService;
+        private readonly IProfileService _profileService;
+        private readonly JwtService _jwtService;
+        private readonly ICountryService _countryService;
 
-        public DashboardController(IUserService userService, IJwtService jwtService)
+        public ProfileController(IProfileService profileService, JwtService jwtService,ICountryService countryService)
         {
-            _userService = userService;
+            _profileService = profileService;
             _jwtService = jwtService;
+            _countryService = countryService;
         }
 
+/*------------------------------------------------------ View My Profile and Update Proile---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region My Profile
+
+        [HttpGet]
         public async Task<IActionResult> MyProfile()
         {
             var token = Request.Cookies["authToken"];
             var email = _jwtService.GetClaimValue(token, "email");
 
-            var model = await _userService.GetMyProfileAsync(email);
+            var model = await _profileService.GetMyProfileAsync(email);
             if (model == null) return NotFound();
 
             return View(model);
@@ -31,15 +38,55 @@ namespace PizzaShop.Controllers
         [HttpPost]
         public async Task<IActionResult> MyProfile(MyProfileViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) 
+                return View(model);
 
-            var isUpdated = await _userService.UpdateProfileAsync(model);
-            if (!isUpdated) return View(model);
+            var isUpdated = await _profileService.UpdateProfileAsync(model);
 
-            TempData["SuccessMessage"] = "Profile updated successfully!";
+            if (!isUpdated) 
+                return View(model);
+
+
             return RedirectToAction("ChangePassword");
         }
 
+#endregion
+
+#region Country, state and City
+[HttpGet]
+    public IActionResult GetCountries()
+    {
+        var countries = _countryService.GetCountries();
+        return Json(new SelectList(countries, "Id", "Name"));
+    }
+
+    [HttpGet]
+    public IActionResult GetStates(long countryId)
+    {
+        var states = _countryService.GetStates(countryId);
+        return Json(new SelectList(states, "Id", "Name"));
+    }
+
+    [HttpGet]
+    public IActionResult GetCities(long stateId)
+    {
+        var cities = _countryService.GetCities(stateId);
+        return Json(new SelectList(cities, "Id", "Name"));
+    }
+
+    // [HttpGet]
+    // public IActionResult GetRoles(int roleID)
+    // {
+    //     var roles = _context.Roles.ToList();
+    //     return Json(new SelectList(roles, "Id", "Name"));
+    // }
+#endregion
+
+/*---------------------------------------------------------------Change Password---------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region Change Password       
+
+        [HttpGet]
         public IActionResult ChangePassword()
         {
             var token = Request.Cookies["authToken"];
@@ -53,18 +100,26 @@ namespace PizzaShop.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            var isPasswordChanged = await _userService.ChangePasswordAsync(model);
+            var isPasswordChanged = await _profileService.ChangePasswordAsync(model);
             if (!isPasswordChanged) return View(model);
 
             TempData["SuccessMessage"] = "Password changed successfully!";
             return RedirectToAction("MyProfile");
         }
 
+#endregion
+
+/*---------------------------------------------------------------Logout---------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region Logout
+
         public IActionResult Logout()
         {
             Response.Cookies.Delete("authToken");
             return RedirectToAction("Login", "Home");
         }
+
+#endregion
+
     }
 }
-

@@ -1,13 +1,11 @@
-using BusinessLogicLayer.ViewModels;
-using System.Threading.Tasks;
+using DataAccessLayer.ViewModels;
 
 namespace BusinessLogicLayer.Interfaces
 {
     public interface IProfileService
     {
-        Task<MyProfileViewModel> GetMyProfileAsync(string email);
-        Task<bool> UpdateProfileAsync(MyProfileViewModel model);
-        Task<bool> ChangePasswordAsync(ChangePasswordViewModel model);
+        public Task<MyProfileViewModel> GetMyProfileAsync(string email);
+        public Task<bool> UpdateProfileAsync(MyProfileViewModel model);
+        public Task<bool> ChangePasswordAsync(ChangePasswordViewModel model);
     }
 }
-

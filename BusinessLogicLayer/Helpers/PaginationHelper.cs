@@ -1,9 +1,11 @@
+using DataAccessLayer.ViewModels;
+
 namespace BusinessLogicLayer.Helpers;
 
 public static class PaginationHelper
 {
     public static void SetPagination(
-        this Pagination page,
+        this PaginationViewModel page,
         int totalRecords,
         int pageSize,
         int pageNumber
@@ -26,4 +28,3 @@ public static class PaginationHelper
         page.CurrentPage = pageNumber;
     }
 }
-

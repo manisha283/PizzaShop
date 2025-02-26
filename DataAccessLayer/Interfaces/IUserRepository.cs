@@ -1,35 +1,23 @@
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using DataAccessLayer.Models;
+using DataAccessLayer.ViewModels;
 
-namespace DataAccessLayer.Repositories
+namespace DataAccessLayer.Interfaces;
+public interface IUserRepository
 {
-    public class UserRepository : IUserRepository
-    {
-        private readonly PizzaShopContext _context;
+    public IEnumerable<User> GetAll();
 
-        public UserRepository(PizzaShopContext context)
-        {
-            _context = context;
-        }
+    // (IEnumerable<User> users, int totalRecords) GetPagedRecordsAsync(
+    //     int pageSize,
+    //     int pageNumber
+    // );
 
-        public async Task<User> GetUserByEmailAsync(string email)
-        {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-        }
+    public Task AddAsync(User user);
 
-        public async Task<string> GetUserRoleAsync(int roleId)
-        {
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId);
-            return role?.Name ?? "User";
-        }
+    public Task<User?> GetUserByEmailAsync(string email);
 
-        public async Task UpdateAsync(User user)
-        {
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-        }
-    }
+    public Task<Role?> GetUserRoleAsync(long roleId);
+    
+    public Task UpdateAsync(User user);
 }
+
 

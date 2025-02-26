@@ -1,16 +1,8 @@
-using DataAccessLayer.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using DataAccessLayer.ViewModels;
 
-namespace BusinessLogicLayer.Services
+namespace BusinessLogicLayer.Interfaces;
+
+public interface IUserService
 {
-    public interface IUserService
-    {
-        Task<IEnumerable<User>> GetAllUsersAsync();
-        public UserPagination GetPagedRecords(int pageSize, int pageNumber);
-        Task<User> GetUserByIdAsync(int id);
-        Task<bool> AddUserAsync(User user);
-        Task<bool> UpdateUserAsync(User user);
-        Task<bool> DeleteUserAsync(int id);
-    }
+    public UserInfoViewModel
 }

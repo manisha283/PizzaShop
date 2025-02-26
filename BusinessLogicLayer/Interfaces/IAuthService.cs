@@ -1,6 +1,3 @@
-using System.Threading.Tasks;
-using DataAccessLayer.Models;
-
 namespace BusinessLogicLayer.Interfaces
 {
     public interface IAuthService

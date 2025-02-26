@@ -6,6 +6,8 @@ using DataAccessLayer.Models;
 using DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Http;
 using BCrypt.Net;
+using DataAccessLayer.Interfaces;
+using BusinessLogicLayer.Helpers;
 
 namespace BusinessLogicLayer.Services
 {
@@ -24,6 +26,9 @@ namespace BusinessLogicLayer.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
+/*-----------------------------------------------------------------Login---------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region Login
         public async Task<bool> LoginAsync(string email, string password, bool rememberMe)
         {
             var user = await _userRepository.GetUserByEmailAsync(email);
@@ -31,7 +36,7 @@ namespace BusinessLogicLayer.Services
                 return false;
 
             var role = await _userRepository.GetUserRoleAsync(user.RoleId);
-            var token = _jwtService.GenerateToken(email, role);
+            var token = _jwtService.GenerateToken(email,role.Name);
 
             CookieOptions options = new CookieOptions
             {
@@ -46,7 +51,11 @@ namespace BusinessLogicLayer.Services
 
             return true;
         }
+#endregion
 
+/*---------------------------------------------------------------Forgot Password------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region ForgotPassword
         public async Task<bool> ForgotPasswordAsync(string email)
         {
             var user = await _userRepository.GetUserByEmailAsync(email);
@@ -57,24 +66,39 @@ namespace BusinessLogicLayer.Services
 
             string body = $@"
                 <div style='background-color: #F2F2F2;'>
-                    <p>Please click <a href='{resetLink}'>here</a> to reset your password.</p>
-                    <p>For security reasons, the link will expire in 24 hours.</p>
+                    <div style='background-color: #0066A8; color: white; height: 90px; font-size: 40px; font-weight: 600; text-align: center; padding-top: 40px; margin-bottom: 0px;'>PIZZASHOP</div>
+                    <div style='font-family:Verdana, Geneva, Tahoma, sans-serif; margin-top: 0px; font-size: 20px; padding: 10px;'>
+                        <p>Pizza shop,</p>
+                        <p>Please click <a href='{resetLink}'>here</a> for reset your account Password.</p>
+                        <p>If you encounter any issues or have any question, please do not hesitate to contact our support team.</p>
+                        <p><span style='color: orange;'>Important Note:</span> For security reasons, the link will expire in 24 hours. If you did not request a password reset, please ignore this email or contact our support team immediately.</p>
+                    </div>
                 </div>";
 
             await _emailService.SendEmailAsync(email, "Reset Password", body);
             return true;
         }
+#endregion
 
+/*---------------------------------------------------------------Reset Password------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region ResetPassword
         public async Task<bool> ResetPasswordAsync(string email, string newPassword, string confirmPassword)
         {
-            if (newPassword != confirmPassword) return false;
+            if (newPassword != confirmPassword) 
+                return false;
 
             var user = await _userRepository.GetUserByEmailAsync(email);
-            if (user == null) return false;
+            
+            if (user == null) 
+                return false;
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
             await _userRepository.UpdateAsync(user);
             return true;
         }
+#endregion
+
     }
 }
+

@@ -1,3 +1,4 @@
+using BusinessLogicLayer.Interfaces;
 using BusinessLogicLayer.Services;
 using DataAccessLayer.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -16,8 +17,8 @@ namespace PizzaShop.Controllers
 
         public async Task<IActionResult> UsersList()
         {
-            var users = await _userService.GetAllUsersAsync();
-            return View(users);
+            var users = _userService.GetAllUsersAsync();
+            return View();
         }
 
         public IActionResult AddUser()
@@ -64,4 +65,3 @@ namespace PizzaShop.Controllers
         }
     }
 }
-

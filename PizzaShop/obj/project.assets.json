@@ -2083,6 +2083,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v7.0",
         "dependencies": {
+          "BCrypt.Net": "0.1.0",
           "DataAccessLayer": "1.0.0",
           "MailKit": "4.10.0",
           "Microsoft.IdentityModel.Tokens": "7.7.1",
@@ -6589,35 +6590,37 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\pci47\\.nuget\\packages\\": {}
+    "C:\\Users\\MANISHA PATEL\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\pci47\\Desktop\\PizzashopMVC\\PizzaShop\\PizzaShop.csproj",
+      "projectUniqueName": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop\\PizzaShop.csproj",
       "projectName": "PizzaShop",
-      "projectPath": "C:\\Users\\pci47\\Desktop\\PizzashopMVC\\PizzaShop\\PizzaShop.csproj",
-      "packagesPath": "C:\\Users\\pci47\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\pci47\\Desktop\\PizzashopMVC\\PizzaShop\\obj\\",
+      "projectPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop\\PizzaShop.csproj",
+      "packagesPath": "C:\\Users\\MANISHA PATEL\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\pci47\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\MANISHA PATEL\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net7.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
-            "C:\\Users\\pci47\\Desktop\\PizzashopMVC\\BusinessLogicLayer\\BusinessLogicLayer.csproj": {
-              "projectPath": "C:\\Users\\pci47\\Desktop\\PizzashopMVC\\BusinessLogicLayer\\BusinessLogicLayer.csproj"
+            "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\BusinessLogicLayer\\BusinessLogicLayer.csproj": {
+              "projectPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\BusinessLogicLayer\\BusinessLogicLayer.csproj"
             },
-            "c:\\Users\\pci47\\Desktop\\PizzashopMVC\\DataAccessLayer\\DataAccessLayer.csproj": {
-              "projectPath": "c:\\Users\\pci47\\Desktop\\PizzashopMVC\\DataAccessLayer\\DataAccessLayer.csproj"
+            "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\DataAccessLayer.csproj": {
+              "projectPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\DataAccessLayer\\DataAccessLayer.csproj"
             }
           }
         }

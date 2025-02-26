@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using BusinessLogicLayer.Interfaces;
-using DataAccessLayer.ViewModel;
+using BusinessLogicLayer.Services;
+using DataAccessLayer.ViewModels;
 
 namespace PizzaShop.Controllers
 {
@@ -14,10 +15,15 @@ namespace PizzaShop.Controllers
             _authService = authService;
         }
 
+/*---------------------------------------------------------Login-----------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------*/
+#region Login
+
+        [HttpGet]
         public IActionResult Login()
         {
             if (Request.Cookies["emailCookie"] != null)
-                return RedirectToAction("MyProfile", "Dashboard");
+                return RedirectToAction("MyProfile", "Profile");
 
             return View();
         }
@@ -25,27 +31,46 @@ namespace PizzaShop.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) 
+                return View(model);
 
             var success = await _authService.LoginAsync(model.Email, model.Password, model.RememberMe);
-            if (success)
-                return RedirectToAction("MyProfile", "Dashboard");
 
-            ViewBag.Error = "Invalid credentials";
+            if (success)
+                return RedirectToAction("MyProfile", "Profile");
+
             return View(model);
         }
 
-        public IActionResult ForgotPassword() => View();
+#endregion
+
+/*-------------------------------------------------------Forgot Password-----------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------*/
+#region Forgot Password
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
 
         [HttpPost]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) 
+                return View(model);
 
             await _authService.ForgotPasswordAsync(model.Email);
-            return RedirectToAction("Privacy");
+            return RedirectToAction("Login","Auth");
         }
 
+#endregion
+
+/*-------------------------------------------------------Reset Password-----------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------*/
+#region Reset Password
+
+        [HttpGet]
         public IActionResult ResetPassword(string email)
         {
             ViewBag.email = email;
@@ -56,19 +81,19 @@ namespace PizzaShop.Controllers
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid)
-            {
-                return RedirectToAction("Privacy");
-            } 
+                return View(model);
 
             var success = await _authService.ResetPasswordAsync(model.Email, model.NewPassword, model.ConfirmPassword);
             if (success)
             {
-                return RedirectToAction("Login");
+                return RedirectToAction("Login","Auth");
             } 
 
-            ViewBag.Error = "Error resetting password";
             return View(model);
         }
+
+#endregion
+
     }
 }
 
