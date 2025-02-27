@@ -55,7 +55,7 @@
                         <img src="~/images/icons/edit.svg" alt=""/>
                     </a>
                     
-                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                    <button type="button" class="btn delete-user-btn" data-user-id="@user.UserId" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                         <img src="~/images/icons/delete.svg" alt="">
                     </button>
                 </td>
@@ -101,9 +101,35 @@
                 <span>Are you sure you want to delete this user?</span> 
             </div>
             <div class="modal-footer d-flex justify-content-center">
-                <button type="button" class="btn btn-blue" data-bs-dismiss="modal">Yes</button>
-                <button type="button" class="btn btn-white">No</button>
+                <button type="button" class="btn btn-blue" id="confirmDelete">Yes</button>
+                <button type="button" class="btn btn-white" data-bs-dismiss="modal">No</button>
             </div>
         </div>  
     </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        $(".delete-user-btn").click(function () {
+            let userId = $(this).data("user-id");
+
+            $("#staticBackdrop").modal("show");
+
+            $("#confirmDelete").off("click").on("click", function () {
+                $.ajax({
+                    url: '/ManageUsers/DeleteUser',
+                    type: 'POST',
+                    data: { id: userId },
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload(); // Refresh the page
+                        }
+                    },
+                    error: function () {
+                        alert("Error while deleting user.");
+                    }
+                });
+            });
+        });
+    });
+</script>
