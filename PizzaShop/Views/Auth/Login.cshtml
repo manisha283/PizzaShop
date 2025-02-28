@@ -1,6 +1,6 @@
 ﻿@model DataAccessLayer.ViewModels.LoginViewModel;
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Login";
     Layout = "_LoginLayout";
 }
 
@@ -29,7 +29,7 @@
                         <!-- Email -->
                         <div class="mb-3">
                             <div class="input-group">
-                                <input asp-for="@Model.Email" class="form-control login-input p-2" id="inputEmail" placeholder=" Email*">
+                                <input asp-for="@Model.Email" class="form-control login-input p-2" id="inputEmail" placeholder=" Email*" required>
                                 <span class="input-group-text"><img src="images/icons/customer.svg"></span>
                             </div>
                             <span asp-validation-for="Email" class="text-danger"></span>
@@ -38,7 +38,7 @@
                         <!-- Password -->
                         <div class="mb-3">
                             <div class="input-group">
-                                <input asp-for="@Model.Password" type="password" class="form-control login-input p-2" id="inputPassword1" placeholder=" Password*">
+                                <input asp-for="@Model.Password" type="password" class="form-control login-input p-2" id="inputPassword1" placeholder=" Password*" required>
                                 <span class="input-group-text"><img src="images/icons/hidden.png" width="16px"></span>
                             </div>
                             <span asp-validation-for="Password" class="text-danger"></span>
@@ -56,16 +56,12 @@
                             </div>
 
                             <div>
-                                <a href="#" id="forgotPasswordLink">Forgot password?</a>
+                                <a asp-action="ForgotPassword" asp-controller="Auth" id="forgotPasswordLink">Forgot password?</a>
                             </div>
                         </div>
 
                         <div>
-                            <button a type="submit" class="btn login-btn w-100">Login</button>
-                        </div>
-
-                        <div class="text-danger">
-                            @Html.ValidationSummary()
+                            <button type="submit" class="btn login-btn w-100">Login</button>
                         </div>
 
                     </form>
@@ -88,7 +84,7 @@
         localStorage.setItem('userEmail', email);
 
         // Redirect to ForgotPassword page
-        window.location.href = '@Url.Action("ForgotPassword", "Home")';
+        window.location.href = '@Url.Action("ForgotPassword", "Auth")';
     });
 </script>
 

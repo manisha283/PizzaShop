@@ -19,6 +19,21 @@ namespace PizzaShop.Controllers
             _countryService = countryService;
         }
 
+/*--------------------------------------------------------Dashboard---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region My Profile
+
+    [HttpGet]
+    public IActionResult Dashboard()
+    {
+        ViewData["sidebar-active"] = "Dashboard";
+        return View();
+    }
+
+#endregion
+
+
+
 /*------------------------------------------------------ View My Profile and Update Profile---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 #region My Profile
@@ -47,11 +62,13 @@ namespace PizzaShop.Controllers
             if (!isUpdated) 
                 return View(model);
 
-
             return RedirectToAction("UsersList","ManageUsers");
         }
 
 #endregion
+
+/*------------------------------------------------------ Country, state and City---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 #region Country, state and City
 [HttpGet]
@@ -75,12 +92,6 @@ namespace PizzaShop.Controllers
         return Json(new SelectList(cities, "Id", "Name"));
     }
 
-    // [HttpGet]
-    // public IActionResult GetRoles(int roleID)
-    // {
-    //     var roles = _context.Roles.ToList();
-    //     return Json(new SelectList(roles, "Id", "Name"));
-    // }
 #endregion
 
 /*---------------------------------------------------------------Change Password---------------------------------------------------------------------------------

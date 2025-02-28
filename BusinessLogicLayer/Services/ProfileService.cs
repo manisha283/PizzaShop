@@ -26,10 +26,13 @@ namespace BusinessLogicLayer.Services
             if (user == null)
                 return null;
 
+            var role = await _userRepository.GetUserRoleAsync(user.RoleId);
+
             MyProfileViewModel userProfile =  new MyProfileViewModel
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
+                Role = role.Name,
                 UserName = user.Username,
                 Email = user.Email,
                 Phone = user.Phone,
@@ -72,6 +75,25 @@ namespace BusinessLogicLayer.Services
                 user.CityId = model.CityId;
                 user.Address = model.Address;
                 user.ZipCode = model.ZipCode;
+
+                 // Handle Image Upload
+                if (model.image != null)
+                {
+                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    string fileName = $"{Guid.NewGuid()}_{model.image.FileName}";
+                    string filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.image.CopyToAsync(stream);
+                    }
+
+                    user.ProfileImg = $"/uploads/{fileName}";
+                }
 
                 await _userRepository.UpdateAsync(user);
                 return true;

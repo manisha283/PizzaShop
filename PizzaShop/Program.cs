@@ -17,6 +17,7 @@ builder.Services.AddScoped<ICountryRepository,CountryRepository>();
 
 //For adding services of business logic layer
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<PasswordHelper>();
 builder.Services.AddScoped<IEmailService,EmailService>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddTransient<IProfileService, ProfileService>();
@@ -32,7 +33,7 @@ builder.Services.Configure<EmailSettings>
 (builder.Configuration.GetSection("SmtpSettings"));
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.ConfigureApplicationCookie(options => options.LoginPath = "/Home/Login");
+builder.Services.ConfigureApplicationCookie(options => options.LoginPath = "/Auth/Login");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
