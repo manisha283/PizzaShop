@@ -68,7 +68,7 @@
         <span>Showing @Model.Page.FromRec - @Model.Page.ToRec of @Model.Page.TotalRecord</span>
 
         <!-- Previous Page Button -->
-        <button class="btn border @(Model.Page.CurrentPage > 1 ? "" : "disabled")"
+        <button class="btn border btn-prev @(Model.Page.CurrentPage > 1 ? "" : "disabled")"
             onclick="PaginationAjax(@Model.Page.CurrentPage - 1)">
             <img src="~/images/icons/chevron-left.svg" alt="">
         </button>
@@ -83,7 +83,7 @@
         } *@
 
         <!-- Next Page Button -->
-        <button class="btn border @(Model.Page.CurrentPage < Model.Page.TotalPages ? "" : "disabled")"
+        <button class="btn border btn-next @(Model.Page.CurrentPage < Model.Page.TotalPages ? "" : "disabled")"
             onclick="PaginationAjax(@Model.Page.CurrentPage + 1)">
             <img src="~/images/icons/chevron-right.svg" alt="">
         </button>
