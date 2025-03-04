@@ -41,6 +41,12 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 //Auth Service
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+//User Service
+builder.Services.AddScoped<IUserService, UserService>();
+
+//Role and Permission Service and Repository
+builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
+builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
 
 //Authentication
 var jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();
@@ -57,7 +63,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived = context =>
             {
-                // Extract token from the cookie
+                // Extract token from the "JwtToken" cookie
                 var token = context.Request.Cookies["authToken"];
                 if (!string.IsNullOrEmpty(token))
                 {
@@ -73,11 +79,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtConfig.Issuer,
-            ValidAudience = jwtConfig.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Key))
+            ValidIssuer = builder.Configuration["JwtConfig:Issuer"],
+            ValidAudience = builder.Configuration["JwtConfig:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtConfig:Key"]))
         };
     });
+
 // Add Authorization Middleware
 builder.Services.AddAuthorization();
 

@@ -10,15 +10,11 @@ namespace PizzaShop.Service.Services;
 public class JwtService : IJwtService
 {
     private readonly string _secretKey;
-    private readonly string _issuer;
-    private readonly string _audience;
     private readonly int _tokenDuration;
 
     public JwtService(IConfiguration configuration)
     {
-        _secretKey = configuration["JwtConfig:Key"] ?? throw new ArgumentNullException("JwtConfig:Key is missing.");
-        _issuer = configuration["JwtConfig:Issuer"] ?? "localhost";
-        _audience = configuration["JwtConfig:Audience"] ?? "localhost";
+        _secretKey = configuration["JwtConfig:Key"];
         _tokenDuration = int.Parse(configuration["JwtConfig:Duration"] ?? "24"); // Default: 24 hours
     }
 
@@ -47,29 +43,10 @@ public class JwtService : IJwtService
     // Extracts claims from a JWT token.
     public ClaimsPrincipal? GetClaimsFromToken(string token)
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_secretKey);
-
-        try
-        {
-            var parameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = true,
-                ValidIssuer = _issuer,
-                ValidateAudience = true,
-                ValidAudience = _audience,
-                ValidateLifetime = true
-            };
-
-            var principal = tokenHandler.ValidateToken(token, parameters, out _);
-            return principal;
-        }
-        catch (Exception)
-        {
-            return null; // Token is invalid
-        }
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
+        var claims = new ClaimsIdentity(jwtToken.Claims);
+        return new ClaimsPrincipal(claims);
     }
 
     // Retrieves a specific claim value from a JWT token.

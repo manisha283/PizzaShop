@@ -2,7 +2,7 @@ using PizzaShop.Entity.Models;
 using PizzaShop.Repository.Interfaces;
 using PizzaShop.Service.Helpers;
 using PizzaShop.Service.Interfaces;
-using PizzaShop.Service.ViewModels;
+using PizzaShop.Entity.ViewModels;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -23,148 +23,150 @@ public class UserService : IUserService
         _emailService = emailService;
     }
 
-    /*------------------------------------------------------------
-                     Display User List
-    --------------------------------------------------------------*/
-    public async Task<UsersListViewModel> GetUsersListAsync(int pageNumber, int pageSize, string search)
-    {
-        var (users, totalRecords) = await _userRepository.GetPagedRecordsAsync(
-            pageSize,
-            pageNumber,
-            filter: u => !u.IsDeleted && 
-                         (string.IsNullOrEmpty(search) || 
-                          u.FirstName.Contains(search) || 
-                          u.LastName.Contains(search) || 
-                          u.Email.Contains(search)),
-            orderBy: q => q.OrderBy(u => u.Id),
-            includes: new List<Expression<Func<User, object>>> { u => u.Role }
-        );
+/*----------------------------------------------------------------Display User List--------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region Display User List
 
-        var userViewModels = users.Select(u => new UserInfoViewModel
+    // public async Task<UsersListViewModel> GetUsersListAsync(int pageNumber, int pageSize, string search)
+    // {
+    //     var userList = await _userRepository.GetUsersInfoAsync(pageNumber, pageSize, search);
+    //     return userList;
+    // }
+
+    public UsersListViewModel GetPagedRecords(int pageSize, int pageNumber)
+    {
+        UsersListViewModel model = new(){ Page = new() };
+        var users = _userRepository.GetPagedRecords(pageSize,pageNumber,orderBy: q => q.OrderBy(u => u.Id));
+        model.User = users.records.Select(u => new UserInfoViewModel()
         {
-            UserId = u.Id,
-            ProfileImageUrl = u.ProfileImg,
             FirstName = u.FirstName,
             LastName = u.LastName,
             Email = u.Email,
             Phone = u.Phone,
             Role = u.Role.Name,
-            Status = u.IsActive
+            Status = u.IsActive,
+            IsDeleted = u.IsDeleted,
+            UserId = u.Id,
+            ProfileImageUrl = u.ProfileImg
         }).ToList();
 
-        return new UsersListViewModel
-        {
-            User = userViewModels,
-            TotalRecords = totalRecords
-        };
+        model.Page.SetPagination(users.totalRecord, pageSize, pageNumber);
+        return model;
     }
 
-    /*------------------------------------------------------------ Add User
-    --------------------------------------------------------------*/
-    public async Task<AddUserViewModel> GetAddUserAsync()
-    {
-        return new AddUserViewModel
-        {
-            Countries = _addressService.GetCountries(),
-            Roles = _roleRepository.GetAll().ToList()
-        };
-    }
+    
 
-    public async Task<bool> AddUserAsync(AddUserViewModel model, string creatorEmail)
-    {
-        var creater = _userRepository.GetByStringAsync(u => u.Email == creatorEmail);
+#endregion
 
-        var password = model.Password;
-        model.Password = PasswordHelper.HashPassword(password);
+/*----------------------------------------------------------------Add User--------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region  Add User
 
-        await _userRepository.AddAsync(new User
-        {
-            FirstName = model.FirstName,
-            LastName = model.LastName,
-            Email = model.Email,
-            Password = model.Password,
-            CountryId = model.CountryId,
-            StateId = model.StateId,
-            CityId = model.CityId,
-            RoleId = model.RoleId,
-            CreatedBy = createrEmail.Id
-        });
+    //This method is used for getting the countries in 
+    // public async Task<AddUserViewModel> GetAddUser()
+    // {
+    //     AddUserViewModel newUser = new AddUserViewModel
+    //     {
+    //         Countries = _addressService.GetCountries(),
+    //         Roles = _roleRepository.GetAll().ToList()
+    //     };
 
-        string body = $@"
-            <div style='background-color: #F2F2F2;'>
-                <div style='background-color: #0066A8; color: white; height: 90px; font-size: 40px; font-weight: 600; text-align: center; padding-top: 40px; margin-bottom: 0px;'>PIZZASHOP</div>
-                <div style='font-family:Verdana, Geneva, Tahoma, sans-serif; margin-top: 0px; font-size: 20px; padding: 10px;'>
-                    <p>Pizza shop,</p>
-                    <h3>Your Password is : {password}</h3>
-                    <p>If you encounter any issues or have any question, please do not hesitate to contact our support team.</p>
-                </div>
-            </div>";
+    //     return newUser;
+    // }
 
-        await _emailService.SendEmailAsync(model.Email, "New User", body);
+    // public async Task<bool> AddUserAsync(AddUserViewModel model, string createrEmail)
+    // {
+    //     var password = model.Password;
+    //     model.Password = PasswordHelper.HashPassword(password);
+    
 
-        return true;
-    }
+    //     var success = await _userRepository.AddAsync(model);
+       
+    //    if(success)
+    //    {
+    //         string body = $@"
+    //             <div style='background-color: #F2F2F2;'>
+    //                 <div style='background-color: #0066A8; color: white; height: 90px; font-size: 40px; font-weight: 600; text-align: center; padding-top: 40px; margin-bottom: 0px;'>PIZZASHOP</div>
+    //                 <div style='font-family:Verdana, Geneva, Tahoma, sans-serif; margin-top: 0px; font-size: 20px; padding: 10px;'>
+    //                     <p>Pizza shop,</p>
+    //                     <h3>Your Password is : {password}</h3>
+    //                     <p>If you encounter any issues or have any question, please do not hesitate to contact our support team.</p>
+    //                 </div>
+    //             </div>";
 
-    /*------------------------------------------------------------ Edit User
-    --------------------------------------------------------------*/
-    public async Task<EditUserViewModel?> GetUserByIdAsync(long id)
-    {
-        var user = await _userRepository.GetByIdAsync(id);
-        if (user == null) return null;
+    //         await _emailService.SendEmailAsync(model.Email, "New User", body);
+    //    }
 
-        return new EditUserViewModel
-        {
-            Id = user.Id,
-            Name = user.Name,
-            Email = user.Email,
-            CountryId = user.CountryId,
-            StateId = user.StateId,
-            CityId = user.CityId,
-            RoleId = user.RoleId,
-            Roles = _roleRepository.GetAll().ToList(),
-            Countries = _addressService.GetCountries(),
-            States = _addressService.GetStates(user.CountryId),
-            Cities = _addressService.GetCities(user.StateId)
-        };
-    }
+    //     return true;
+    // }
+#endregion
 
-    public async Task<bool> UpdateUserAsync(EditUserViewModel model)
-    {
-        var user = await _userRepository.GetByIdAsync(model.Id);
-        if (user == null) return false;
+/*----------------------------------------------------------------Edit User--------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region Edit User
 
-        user.Name = model.Name;
-        user.Email = model.Email;
-        user.CountryId = model.CountryId;
-        user.StateId = model.StateId;
-        user.CityId = model.CityId;
-        user.RoleId = model.RoleId;
+    // public EditUserViewModel GetUserByIdAsync(long id)
+    // {
+    //     var user = _userRepository.GetUserByIdAsync(id);
+    //     if (user == null)
+    //         return null;
 
-        await _userRepository.UpdateAsync(user);
-        return true;
-    }
+    //     user.Roles =  _userRepository.GetRoles();
+    //     user.Countries = _countryRepository.GetCountries();
+    //     user.States = _countryRepository.GetStates(user.CountryId);
+    //     user.Cities = _countryRepository.GetCities(user.StateId);
+    //     return user;
+    // }
 
-    /*------------------------------------------------------------ Soft Delete User
-    --------------------------------------------------------------*/
-    public async Task<bool> SoftDeleteUserAsync(long id)
-    {
-        var user = await _userRepository.GetByIdAsync(id);
-        if (user == null) return false;
+    // public EditUserViewModel GetUserAsync(long userId)
+    // {
+    //     var user =  _userRepository.GetUserByIdAsync(userId);
+    //     if (user == null)
+    //         return null;
 
-        user.IsDeleted = true;
-        await _userRepository.UpdateAsync(user);
-        return true;
-    }
+    //     user.Roles =  _userRepository.GetRoles();
+    //     user.Countries = _countryRepository.GetCountries();
+    //     user.States = _countryRepository.GetStates(user.CountryId);
+    //     user.Cities = _countryRepository.GetCities(user.StateId);
+    //     return user;
+    // }
 
-    /*------------------------------------------------------------ Common Methods
-    --------------------------------------------------------------*/
-    public async Task<User?> GetUserByEmailAsync(string email)
-    {
-        return await _userRepository.GetByStringAsync(u => u.Email == email);
-    }
+    // public async Task<bool> UpdateUser(EditUserViewModel model)
+    // {
+    //     return await _userRepository.UpdateUser(model);
+    // }
 
-    public List<Role> GetRoles()
-    {
-        return _roleRepository.GetAll().ToList();
-    }
+#endregion
+
+/*----------------------------------------------------------------Soft Delete User--------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region Soft Delete
+
+    // public async Task<bool> SoftDeleteUser(long id){
+    //     return await _userRepository.SoftDeleteUser(id);
+    // }
+
+#endregion
+
+/*----------------------------------------------------------------Common--------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#region Common
+    // public async Task<User?> GetUserByEmailAsync(string email)
+    // {
+    //     var user = await _userRepository.GetUserByEmailAsync(email);
+    //     return user;
+    // }
+
+    // public async Task<List<UserInfoViewModel>> GetUserInfoAsync()
+    // {
+    //     var userList = await _userRepository.GetUsersInfoAsync();
+    //     return userList;
+    // }
+
+
+    // public List<Role> GetRoles()
+    // {
+    //     return _userRepository.GetRoles();
+    // }
+#endregion
 }

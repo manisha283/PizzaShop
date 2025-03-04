@@ -48,6 +48,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlVXNlcnNcVXNlcnNMaXN0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/MANISHA PATEL/Desktop/Tatvasoft/Pizzashop/PizzaShop.Web/Views/ManageUsers/UsersListBackup.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlVXNlcnNcVXNlcnNMaXN0QmFja3VwLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/MANISHA PATEL/Desktop/Tatvasoft/Pizzashop/PizzaShop.Web/Views/ManageUsers/_UsersPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlVXNlcnNcX1VzZXJzUGFydGlhbFZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/MANISHA PATEL/Desktop/Tatvasoft/Pizzashop/PizzaShop.Web/Views/Profile/ChangePassword.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZmlsZVxDaGFuZ2VQYXNzd29yZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -58,6 +66,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/MANISHA PATEL/Desktop/Tatvasoft/Pizzashop/PizzaShop.Web/Views/Profile/MyProfile.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZmlsZVxNeVByb2ZpbGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/MANISHA PATEL/Desktop/Tatvasoft/Pizzashop/PizzaShop.Web/Views/RolePermission/Permission.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUm9sZVBlcm1pc3Npb25cUGVybWlzc2lvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/MANISHA PATEL/Desktop/Tatvasoft/Pizzashop/PizzaShop.Web/Views/RolePermission/Role.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUm9sZVBlcm1pc3Npb25cUm9sZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/MANISHA PATEL/Desktop/Tatvasoft/Pizzashop/PizzaShop.Web/Views/Shared/Error.cshtml]

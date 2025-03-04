@@ -1,25 +1,27 @@
 using PizzaShop.Entity.Models;
-using PizzaShop.Service.ViewModels;
+using PizzaShop.Entity.ViewModels;
 
 namespace PizzaShop.Service.Interfaces;
 
 public interface IUserService
 {
-    public List<Role> GetRoles();
+    // public List<Role> GetRoles();
 
-    public Task<UsersListViewModel> GetUsersListAsync(int pageNumber, int pageSize, string search);
+    // public Task<UsersListViewModel> GetUsersListAsync(int pageNumber, int pageSize, string search);
 
-    public Task<List<UserInfoViewModel>> GetUserInfoAsync();
+    UsersListViewModel GetPagedRecords(int pageSize, int pageNumber);
+    
+    // Task<List<UserInfoViewModel>> GetUserInfoAsync();
 
-    public  Task<User?> GetUserByEmailAsync(string email);
+    // Task<User?> GetUserByEmailAsync(string email);
 
-    public EditUserViewModel GetUserByIdAsync(long id);
+    // EditUserViewModel GetUserByIdAsync(long id);
 
-    public Task<AddUserViewModel> GetAddUser();
+    // Task<AddUserViewModel> GetAddUser();
 
-    public Task<bool> AddUserAsync(AddUserViewModel model, string createrEmail);
+    // Task<bool> AddUserAsync(AddUserViewModel model, string createrEmail);
 
-    public Task<bool> UpdateUser(EditUserViewModel model);
+    // Task<bool> UpdateUser(EditUserViewModel model);
 
-    public Task<bool> SoftDeleteUser(long id);
+    // Task<bool> SoftDeleteUser(long id);
 }
