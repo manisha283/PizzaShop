@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "7/KeO1nTJfaMI6owfAVjeIjNjWJhCYSUwrLvEHRtpodLHO1jWiNubcXc6bl5Ea/8QfMZFIi02jjNnNCMd83zJQ==",
+  "dgSpecHash": "SkrOJRi0JyvXPU2D9+ctyc/Haby7wHT0e/aeuR1V4YetRm285LeU3lji5g8Yw/5k0h2TSQFlvroYhyjy+UXstg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Learning\\PizzaShop\\PizzaShop.Repository\\PizzaShop.Repository.csproj",
+  "projectFilePath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop.Repository\\PizzaShop.Repository.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\MANISHA PATEL\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\MANISHA PATEL\\.nuget\\packages\\microsoft.entityframeworkcore\\7.0.20\\microsoft.entityframeworkcore.7.0.20.nupkg.sha512",

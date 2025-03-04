@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Learning\\PizzaShop\\PizzaShop.Entity\\PizzaShop.Entity.csproj": {}
+    "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop.Entity\\PizzaShop.Entity.csproj": {}
   },
   "projects": {
-    "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Learning\\PizzaShop\\PizzaShop.Entity\\PizzaShop.Entity.csproj": {
+    "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop.Entity\\PizzaShop.Entity.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Learning\\PizzaShop\\PizzaShop.Entity\\PizzaShop.Entity.csproj",
+        "projectUniqueName": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop.Entity\\PizzaShop.Entity.csproj",
         "projectName": "PizzaShop.Entity",
-        "projectPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Learning\\PizzaShop\\PizzaShop.Entity\\PizzaShop.Entity.csproj",
+        "projectPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop.Entity\\PizzaShop.Entity.csproj",
         "packagesPath": "C:\\Users\\MANISHA PATEL\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Learning\\PizzaShop\\PizzaShop.Entity\\obj\\",
+        "outputPath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop.Entity\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\MANISHA PATEL\\AppData\\Roaming\\NuGet\\NuGet.Config",

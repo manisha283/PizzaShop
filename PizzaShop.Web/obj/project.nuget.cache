@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "rEq22rJknTivT3k6hdJ0wRSFgD46Mt00eNF4SJVvWSz9SA8iUcWl6acYluDgm1nASHLloyruleM7Zp6boo3kuQ==",
+  "dgSpecHash": "wiCxCNKJVkrjM3HJaXeYyCQlpwFAtm8Yvx9ZyLtQtsShLq+KBXYiUzwfSir3NBMkh7N7l5F+SrBPZnl8aaeHLQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Learning\\PizzaShop\\PizzaShop.Web\\PizzaShop.Web.csproj",
+  "projectFilePath": "C:\\Users\\MANISHA PATEL\\Desktop\\Tatvasoft\\Pizzashop\\PizzaShop.Web\\PizzaShop.Web.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\MANISHA PATEL\\.nuget\\packages\\bcrypt.net\\0.1.0\\bcrypt.net.0.1.0.nupkg.sha512",
     "C:\\Users\\MANISHA PATEL\\.nuget\\packages\\bouncycastle.cryptography\\2.5.0\\bouncycastle.cryptography.2.5.0.nupkg.sha512",
