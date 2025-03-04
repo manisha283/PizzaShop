@@ -44,8 +44,8 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlVXNlcnNcRWRpdFVzZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[M:/Tatvasoft/Pizzashop/PizzaShop.Web/Views/ManageUsers/UsersList.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlVXNlcnNcVXNlcnNMaXN0LmNzaHRtbA==
+[M:/Tatvasoft/Pizzashop/PizzaShop.Web/Views/ManageUsers/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlVXNlcnNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [M:/Tatvasoft/Pizzashop/PizzaShop.Web/Views/ManageUsers/UsersListBackup.cshtml]
