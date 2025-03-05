@@ -32,9 +32,9 @@ namespace PizzaShop.Web.Controllers
             };
             
             ViewData["sidebar-active"] = "Users";
-            return View(model);
-                
+            return View(model);       
         }
+        
         public IActionResult GetUsersList(int pageSize, int pageNumber = 1)
         {
             var model = _userService.GetPagedRecords(pageSize, pageNumber);

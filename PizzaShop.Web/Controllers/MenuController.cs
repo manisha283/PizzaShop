@@ -85,19 +85,29 @@ public class MenuController : Controller
 #region Items
 /*--------------------------------------------------------Display Items--------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
     [HttpGet]
-     public IActionResult GetItems(int pageSize, int pageNumber = 1)
+    public async Task<IActionResult> GetItems()
+    {
+        ItemsPaginationViewModel model = new ItemsPaginationViewModel{
+            Users = Enumerable.Empty<UserInfoViewModel>(),
+            Page = new Pagination() 
+        };
+
+        return PartialView("_ItemsPartialView", model);
+    }
+
+    public IActionResult GetItemsList(int pageSize, int pageNumber = 1)
+    {
+        var model = _categoryItemService.GetPagedRecords(pageSize, pageNumber);
+
+        if (model == null)
         {
-            var model = _categoryItemService.GetItems(pageSize, pageNumber);
-
-            if (model == null || !model.Items.Any())
-            {
-                return NotFound(); // This triggers AJAX error
-            }
-
-            return PartialView("_ItemsPartialView", model); 
-           
+            return NotFound(); // This triggers AJAX error
         }
+
+        return PartialView("_ItemsListPartialView", model);
+    }
 
 
 

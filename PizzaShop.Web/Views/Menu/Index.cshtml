@@ -377,6 +377,23 @@
 @section Scripts{
     <script>
         
+        $(document).ready(function () {
+            loadUsersList();
+        });
+
+        function loadUsersList() {
+            $.ajax({
+                url: '/Menu/GetItems',
+                type: 'GET',
+                success: function (data) {
+                    $('#Items-Content').html(data);
+                },
+                error: function () {
+                    $('#Items-Content').html('<p>Error loading users.</p>');
+                }
+            });
+        }
+
         //For showing edit and delete icons on hovering 
         $(".li-category").mouseover(function(){
             $(this).children("div.EditDeleteCategory").css("visibility","visible");
@@ -421,7 +438,6 @@
                 }
             });
         });
-
         
         
     </script>
