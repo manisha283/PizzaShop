@@ -254,7 +254,7 @@ td{
     white-space: nowrap;
 }
 
-@media (max-width: 1160px) {
+@media (max-width: 1260px) {
     .category{
         width: 100%;
         height: fit-content;
