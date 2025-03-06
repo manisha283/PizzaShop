@@ -52,12 +52,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[M:/Tatvasoft/Pizzashop/PizzaShop.Web/Views/Menu/_ItemsListPartialView.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudVxfSXRlbXNMaXN0UGFydGlhbFZpZXcuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
 [M:/Tatvasoft/Pizzashop/PizzaShop.Web/Views/Menu/_ItemsPartialView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudVxfSXRlbXNQYXJ0aWFsVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[M:/Tatvasoft/Pizzashop/PizzaShop.Web/Views/Menu/_UpdateItemPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudVxfVXBkYXRlSXRlbVBhcnRpYWxWaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [M:/Tatvasoft/Pizzashop/PizzaShop.Web/Views/Profile/ChangePassword.cshtml]
