@@ -51,6 +51,14 @@ builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>(
 //CategoryItem service
 builder.Services.AddScoped<ICategoryItemService, CategoryItemService>();
 
+//Session 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(1); // Set session timeout
+    options.Cookie.HttpOnly = true; // Ensure session is only accessible via HTTP
+    options.Cookie.IsEssential = true;
+});
+
 //Authentication
 var jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();
 
@@ -88,6 +96,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+
+
 // Add Authorization Middleware
 builder.Services.AddAuthorization();
 
@@ -106,10 +116,20 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Add("Cache-Control", "no-cache, no-store, must-revalidate");
+    context.Response.Headers.Add("Pragma", "no-cache");
+    context.Response.Headers.Add("Expires", "0");
+
+    await next();
+});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();

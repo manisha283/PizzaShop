@@ -254,7 +254,7 @@ td{
     white-space: nowrap;
 }
 
-@media (max-width: 1260px) {
+@media (max-width: 1160px) {
     .category{
         width: 100%;
         height: fit-content;
@@ -394,7 +394,9 @@ td{
     font-weight: 600;
 }
 
-
+.switchAddModal{
+    padding-right: 0px;
+}
 
 
 
