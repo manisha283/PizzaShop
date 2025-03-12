@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PizzaShop.Entity.ViewModels;
 using PizzaShop.Service.Interfaces;
 
 namespace PizzaShop.Web.Controllers;
 
+[Authorize]
 public class MenuController : Controller
 {
     private readonly ICategoryItemService _categoryItemService;
@@ -37,7 +39,7 @@ public class MenuController : Controller
 #region  Category    
  
 #region Edit Category
- /*--------------------------------------------------------Menu Index---------------------------------------------------------------------------------------------------
+ /*-------------------------------------------------------- Edit Category---------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     public IActionResult EditCategory(long categoryId)
     {
@@ -45,7 +47,7 @@ public class MenuController : Controller
         return Json(category);
     }
 
-/*--------------------------------------------------------Menu Index---------------------------------------------------------------------------------------------------
+/*--------------------------------------------------------Edit Category Post---------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     [HttpPost]
     public async Task<IActionResult> EditCategory(MenuViewModel model)
@@ -90,10 +92,11 @@ public class MenuController : Controller
 /*--------------------------------------------------------Display Items--------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 #region  Display Item
+
     [HttpGet]
-    public async Task<IActionResult> GetItems(int pageSize, int pageNumber = 1)
+    public async Task<IActionResult> GetItems(long categoryId, int pageSize, int pageNumber = 1, string search="")
     {
-        var model = _categoryItemService.GetItems(pageSize, pageNumber);
+        var model = await _categoryItemService.GetPagedItems(categoryId, pageSize, pageNumber,search);
         if (model == null)
         {
             return NotFound(); // This triggers AJAX error
@@ -102,27 +105,115 @@ public class MenuController : Controller
     }
 #endregion Display Item
 
-/*--------------------------------------------------------Add/Update Items--------------------------------------------------------------------------------------------------------
+#region Get Add/Update
+/*--------------------------------------------------------Get Add/Update Items--------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-#region Add/Update
-
     [HttpGet]
     public async Task<IActionResult> GetItemModal(long itemId)
     {
-        if(itemId == 0)
+        AddItemViewModel model = await _categoryItemService.GetEditItem(itemId);
+        return PartialView("_UpdateItemPartialView", model); 
+    }
+#endregion Get Add/Update
+
+#region Update Item
+/*--------------------------------------------------------Update Item--------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    [HttpPost]
+    public async Task<IActionResult> AddUpdateItem(AddItemViewModel model)
+    {
+        if (!ModelState.IsValid)
         {
-            AddItemViewModel model = new AddItemViewModel{Name = ""};
-            return PartialView("_UpdateItemPartialView", model);
+            AddItemViewModel updatedModel = await _categoryItemService.GetEditItem(model.ItemId);
+            return PartialView("_UpdateItemPartialView", updatedModel); 
         }
-        else
+
+        if(model.ItemId == 0)
         {
-            AddItemViewModel model = await _categoryItemService.GetEditItem(itemId);
-            return PartialView("_UpdateItemPartialView", model);
+            var token = Request.Cookies["authToken"];
+            var createrEmail = _jwtService.GetClaimValue(token, "email");
+            bool isAdded = await _categoryItemService.AddItem(model, createrEmail);
+            if (!isAdded)
+            {
+                AddItemViewModel updatedModel = await _categoryItemService.GetEditItem(model.ItemId);
+                TempData["errorMessage"] = "Item Not Updated";
+                return RedirectToAction("Index");
+            }
+            TempData["successMessage"] = "Item Added Successfully!";
+            return RedirectToAction("Index");
         }
-        
+
+        bool isUpdated = await _categoryItemService.UpdateItem(model);
+        if (!isUpdated)
+        {
+            AddItemViewModel updatedModel = await _categoryItemService.GetEditItem(model.ItemId);
+            TempData["errorMessage"] = "Item Not Updated";
+            return RedirectToAction("Index");
+        }
+
+        TempData["successMessage"] = "Item Updated";
+        return RedirectToAction("Index");
     }
 
-#endregion Add/Update
+
+#endregion Update Item
+
+#region Add Item
+/*--------------------------------------------------------Add Items--------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    [HttpPost]
+    public async Task<IActionResult> AddItem(AddItemViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            AddItemViewModel updatedModel = await _categoryItemService.GetEditItem(model.ItemId);
+            return PartialView("_UpdateItemPartialView", updatedModel); 
+        }
+
+        var token = Request.Cookies["authToken"];
+        var createrEmail = _jwtService.GetClaimValue(token, "email");
+
+        bool success = await _categoryItemService.AddItem(model, createrEmail);
+
+        if (!success)
+        {
+            AddItemViewModel updatedModel = await _categoryItemService.GetEditItem(model.ItemId);
+            TempData["errorMessage"] = "Item Not Updated";
+            return PartialView("_UpdateItemPartialView", updatedModel); 
+        }
+        return Json(new {success = true, message="Item added successfully!"});
+    }
+#endregion Add Item
+
+#region Delete Item
+/*--------------------------------------------------------Delete One Item--------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    public async Task<IActionResult> SoftDeleteItem(long id)
+    {
+        bool success = await _categoryItemService.SoftDeleteItem(id);
+
+        if(!success)
+        {
+            return Json(new {success = false, message="Item Not deleted"});
+        }
+        return Json(new {success = true, message="Item deleted Successfully!"});
+    }
+
+/*--------------------------------------------------------Delete Multiple Items--------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    public async Task<IActionResult> MassDeleteItems(List<long> itemsList)
+    {
+        bool success = await _categoryItemService.MassDeleteItems(itemsList);
+
+        if(!success)
+        {
+            return Json(new {success = false, message="Items Not deleted"});
+        }
+        return Json(new {success = true, message="All selected Items deleted Successfully!"});
+    }
+
+#endregion Delete Item
+
 
 #endregion Items
 

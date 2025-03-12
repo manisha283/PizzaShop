@@ -3,6 +3,7 @@ using PizzaShop.Entity.Models;
 using PizzaShop.Entity.ViewModels;
 using PizzaShop.Service.Helpers;
 using PizzaShop.Service.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 
 namespace PizzaShop.Service.Services;
@@ -11,12 +12,15 @@ public class ProfileService : IProfileService
     private readonly IGenericRepository<User> _userRepository;
     private readonly IGenericRepository<Role> _roleRepository;
     private readonly IAddressService _addressService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ProfileService(IGenericRepository<User> userRepository, IAddressService addressService, IGenericRepository<Role> roleRepository)
+    public ProfileService(IGenericRepository<User> userRepository, IAddressService addressService, IGenericRepository<Role> roleRepository, IHttpContextAccessor httpContextAccessor)
     {
         _userRepository = userRepository;
         _addressService = addressService;
         _roleRepository = roleRepository;
+        _httpContextAccessor = httpContextAccessor;
+
     }
 
     /*-----------------------------------------------------------------My Profile---------------------------------------------------------------------------------
@@ -95,6 +99,18 @@ public class ProfileService : IProfileService
 
             user.ProfileImg = $"/uploads/{fileName}";
         }
+
+        _httpContextAccessor.HttpContext.Response.Cookies.Delete("userName");
+        _httpContextAccessor.HttpContext.Response.Cookies.Delete("profileImg");
+
+        CookieOptions options = new CookieOptions
+        {
+            Expires = DateTime.Now.AddDays(1),
+            HttpOnly = true,
+            IsEssential = true
+        };
+        _httpContextAccessor.HttpContext.Response.Cookies.Append("userName", user.Username, options);
+        _httpContextAccessor.HttpContext.Response.Cookies.Append("profileImg", user.ProfileImg, options);
         
         return await _userRepository.UpdateAsync(user);
     }
@@ -107,18 +123,20 @@ public class ProfileService : IProfileService
 
     public async Task<bool> ChangePasswordAsync(ChangePasswordViewModel model)
     {
-        var user = await _userRepository.GetByStringAsync(u => u.Email == model.Email);
+        User user = await _userRepository.GetByStringAsync(u => u.Email == model.Email);
 
         if (user == null) 
             return false;
 
         bool verified = PasswordHelper.VerifyPassword(model.OldPassword, user.Password);
-        if (!verified)
-            return false;
-
-        user.Password = PasswordHelper.HashPassword(model.NewPassword);
-        await _userRepository.UpdateAsync(user);
-        return true;
+            
+        if(verified)
+        {
+            user.Password = PasswordHelper.HashPassword(model.NewPassword);
+            return await _userRepository.UpdateAsync(user);
+        }
+        
+        return verified;
     }
     
 #endregion

@@ -11,9 +11,19 @@
     </div>
     <div class="justify-content-end d-flex align-items-center">
         <div class="me-2">
-            <div class="input-group">
-                <input type="search" class="form-control" placeholder="Search" name="search">
+            @* <div class="input-group">
+                <input type="search" class="form-control" placeholder="Search" name="search" id="search">
                 <button type="submit" class="input-group-text"> <img src="~/images/icons/search.svg" alt=""> </button>
+                
+            </div> *@
+            @* <input class="border-0 position-relative d-sm-block d-none" 
+                                placeholder="Search" id="searchTerm">
+                            <i class="bi bi-search position-absolute search_icon"></i> *@
+            <div class="d-flex searchBox">
+                <input type="search" class="form-control" placeholder="Search" name="search" id="search">
+                <div class="searchIcon">
+                    <img src="~/images/icons/search.svg" alt=""> 
+                </div>
             </div>
         </div>
         <div>
@@ -28,10 +38,10 @@
 <div class="table-responsive bg-white px-3" id="tableContent">
     <!-- Partial View -->
 
-    
+
 </div>
 
-@section Scripts{
+@section Scripts {
     <script>
         $(document).ready(function () {
             PaginationAjax(1, $("#itemsPerPage").val()); // Load users on page load
@@ -42,6 +52,40 @@
             PaginationAjax(1, selectedPageSize); // Reload data with new page size
         });
 
+
+        //for Soft Delete of Users
+        let userId;
+        $(document).on("click", ".deleteIcon", function () {
+            userId = $(this).data("id");
+        })
+
+        $(document).on("click", "#SoftDelete", function () {
+            $.ajax({
+                url: '@Url.Action("SoftDeleteUser", "ManageUsers")',
+                type: "POST",
+                data: { id: userId },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message)
+                        setTimeout(function(){
+                            location.reload();
+                        },000);
+                    }
+                    else{
+                        toastr.error(response.message)
+                    }
+                },
+                error: function () {
+                    console.log("User not deleted!");
+                }
+            })
+        })
+
+        $(document).on("input", "#search", function () {
+            var selectedPageSize = $("#itemsPerPage").val();
+            PaginationAjax(1, selectedPageSize); // Reload data with new page size
+        })
+
         function PaginationAjax(pageNumber, pageSize) {
             if (!pageNumber) {
                 pageNumber = @((Model?.Page?.CurrentPage ?? 1));
@@ -50,9 +94,18 @@
                 pageSize = $("#itemsPerPage").val() || 5; // Default to 5 if no value selected
             }
 
+            let searchQuery = $("#search").val();
+            if (searchQuery == null) {
+                searchQuery = ""
+            }
+
             $.ajax({
                 url: "/ManageUsers/GetUsersList",
-                data: { 'pageSize': pageSize, 'pageNumber': pageNumber },
+                data: {
+                    'search': searchQuery,
+                    'pageSize': pageSize,
+                    'pageNumber': pageNumber
+                },
                 type: "GET",
                 dataType: "html",
                 success: function (data) {
@@ -65,5 +118,6 @@
                 }
             });
         }
+
     </script>
 }
