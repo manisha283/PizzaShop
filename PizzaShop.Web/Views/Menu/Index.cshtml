@@ -339,7 +339,6 @@
 
 
         @* this is Pagination of items *@
-
         $(".li-category").on("click",function () {
             categoryId = $(this).data("id");
 
@@ -460,15 +459,12 @@
         //For mass delete of Items
         let itemList = [];
         $(document).on("click", "#itemMassDeleteIcon",function(){
-            console.log("1 itemList is",itemList);
             $(".itemChildCheckbox:checked").each(function () {
                 itemList.push($(this).data("id"));
             });
-            console.log("2 itemList is",itemList);
         });
 
         $(document).on("click", "#confirmMassDeleteItem", function(){
-            console.log("3 itemList is",itemList);
             $.ajax({
                 url: '@Url.Action("MassDeleteItems", "Menu")',
                 type: "POST",
@@ -492,11 +488,27 @@
 
     </script>
 
+    @* Select Modifier in items *@
     <script>
+
+        let modifierGroupList = [];
         $(document).on("change","#selectModifierGroup",function(){
             let modifierGroupId = $(this).val();
-            console.log(modifierGroupId);
-            getSelectedModifierGroup(modifierGroupId);
+            if(modifierGroupList.indexOf(Number(modifierGroupId)) === -1)
+            {
+                modifierGroupList.push(Number(modifierGroupId));
+                getSelectedModifierGroup(modifierGroupId);
+            }
+            $("#selectModifierGroup").val("-1");
+        });
+
+        $(document).on("click",".deselectModifierGroup",function(){
+            let modifierGroupId = $(this).data("id");
+            console.log("delete modifier group id is",modifierGroupId);
+            modifierGroupList = $.grep(modifierGroupList,function(element){
+                return element != modifierGroupId;
+            });
+            $("div").remove(".modifierGroupDetail[data-id ='"+modifierGroupId+"']")
         });
 
         function getSelectedModifierGroup(id){
@@ -506,7 +518,6 @@
                 data : {modifierGroupId : id},
                 dataType : "html",
                 success: function(data){
-                    console.log(data);
                     $("#showModifierGroup").append(data);
                 },
                 error: function(){
@@ -515,5 +526,50 @@
             });
         }
 
+    </script>
+
+    @* Add/Update Item Form Submit *@
+    <script>
+        $(document).on("submit","#AddUpdateItemForm",function(e){
+            e.preventDefault();
+
+            let modifiergroupArr = [];
+
+            $(".modifierGroupDetail").each(function(){
+                let id = $(this).data("id");
+                modifiergroupArr.push({
+                    ModifierGroupId : id,
+                    MinAllowed : Number($(".minAllowed[data-id ='"+id+"']").val()),
+                    MaxAllowed : Number($(".maxAllowed[data-id ='"+id+"']").val()),
+                });
+
+            });
+
+            $("#modifierGroupList").val(JSON.stringify(modifiergroupArr));
+
+            let formData = new FormData(this);
+            
+            
+            $.ajax({
+                url: $(this).attr("action"),
+                type: $(this).attr("method"),
+                data : formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    $("#addEditItem").hide;
+                    toastr.success("Item Added successfully!");
+                    setTimeout(function(){
+                            location.reload();
+                        },3000);
+                },
+                error: function () {
+                    console.log("There is error.Not successful");
+                    alert("No Items Found");
+                    $("#itemsListContent").html('An error has occurred');
+                }
+            });
+
+        });
     </script>
 }
