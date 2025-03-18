@@ -9,17 +9,20 @@ namespace PizzaShop.Web.Controllers;
 [Authorize]
 public class MenuController : Controller
 {
-    private readonly ICategoryItemService _categoryItemService;
     private readonly IJwtService _jwtService;
+    private readonly ICategoryItemService _categoryItemService;
+    private readonly IModifierService _modifierService;
 
-    public MenuController(ICategoryItemService categoryItemService, IJwtService jwtService)
+    public MenuController(ICategoryItemService categoryItemService, IJwtService jwtService, IModifierService modifierService)
     {
         _categoryItemService = categoryItemService;
         _jwtService = jwtService;
+        _modifierService = modifierService;
     }
 
-/*--------------------------------------------------------Menu Index---------------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*--------------------------------------------------------Menu Index---------------------------------------------------------------------------------------------------
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
     [HttpGet]
     public IActionResult Index()
     {
@@ -141,29 +144,15 @@ public class MenuController : Controller
             model.ItemModifierGroups = JsonSerializer.Deserialize<List<ItemModifierViewModel>>(modifierGroupList);
         }
 
-        if(model.ItemId == 0)
-        {
-            var token = Request.Cookies["authToken"];
-            var createrEmail = _jwtService.GetClaimValue(token, "email");
+        string token = Request.Cookies["authToken"];
+        string createrEmail = _jwtService.GetClaimValue(token, "email");
 
-            bool isAdded = await _categoryItemService.AddItem(model, createrEmail);
-            
-            if (!isAdded)
-            {
-                AddItemViewModel updatedModel = await _categoryItemService.GetEditItem(model.ItemId);
-                TempData["errorMessage"] = "Item Not Updated";
-                return RedirectToAction("Index");
-            }
-            TempData["successMessage"] = "Item Added Successfully!";
-            return RedirectToAction("Index");
-        }
+        bool success = await _categoryItemService.AddUpdateItem(model, createrEmail);
 
-        bool isUpdated = await _categoryItemService.UpdateItem(model);
-        if (!isUpdated)
+        if (!success)
         {
             AddItemViewModel updatedModel = await _categoryItemService.GetEditItem(model.ItemId);
-            TempData["errorMessage"] = "Item Not Updated";
-            return RedirectToAction("Index");
+            return PartialView("_UpdateItemPartialView", updatedModel); 
         }
 
         TempData["successMessage"] = "Item Updated";
@@ -205,6 +194,19 @@ public class MenuController : Controller
 
 #endregion Items
 
+#region Modifiers    
+ 
+#region Read Modifier Group
+ /*-------------------------------------------------------- Read Modifier Group---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    [HttpGet]
+    public IActionResult GetModifierTab()
+    {
+        List<ModifierGroupViewModel>? modifierGroupList = _modifierService.GetModifierGroups();
+        return PartialView("_ModifierTabPartialView", modifierGroupList); 
+    }
+#endregion Read Modifier Group
 
+#endregion Modifiers
 
 }

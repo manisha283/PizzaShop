@@ -13,7 +13,13 @@ public interface IGenericRepository<T>
 
     IEnumerable<T> GetByCondition(Expression<Func<T, bool>> predicate);
 
-    public Task<(IEnumerable<T> items, int totalCount)> GetPagedRecordsAsync
+    Task<IEnumerable<T>> GetByConditionInclude(
+        Expression<Func<T, bool>> predicate,
+        List<Expression<Func<T, object>>>? includes = null,
+        List<Func<IQueryable<T>, IQueryable<T>>>? thenIncludes = null
+    );
+
+    Task<(IEnumerable<T> items, int totalCount)> GetPagedRecordsAsync
     (
         int pageSize,
         int pageNumber,
