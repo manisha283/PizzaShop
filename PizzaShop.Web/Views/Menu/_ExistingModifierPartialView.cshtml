@@ -7,7 +7,7 @@
         <thead>
             <tr>
                 <th scope="col">
-                    <input class="form-check-input me-2 " type="checkbox" value="" id="existingModifierParentCheckbox"> 
+                    <input class="form-check-input me-2 " type="checkbox" value="" id="existingModifierParentCb"> 
                     Name
                 </th>
                 <th scope="col">Unit</th>
@@ -20,7 +20,7 @@
             {
                 <tr>
                     <td>
-                        <input type="checkbox" value="" id="" class="me-2 existingModifierChildCheckbox" data-id="@modifier.ModifierId">
+                        <input type="checkbox" class="existingModifierChildCb me-2" value="" id="" class="me-2 " data-id="@modifier.ModifierId" data-name="@modifier.ModifierName">
                         @modifier.ModifierName
                     </td>
                     <td>@modifier.UnitName</td>
@@ -48,16 +48,16 @@
         <span>Showing @Model.Page.FromRec - @Model.Page.ToRec of @Model.Page.TotalRecord</span>
 
         <!-- Previous Page Button -->
-        <button class="btn border btn-prev @(Model.Page.CurrentPage > 1 ? "" : "disabled")"
+        <a class="btn border btn-prev @(Model.Page.CurrentPage > 1 ? "" : "disabled")"
             onclick="existingModifiers(@Model.Page.CurrentPage - 1)">
             <img src="~/images/icons/chevron-left.svg" alt="">
-        </button>
+        </a>
 
         <!-- Next Page Button -->
-        <button class="btn border btn-next @(Model.Page.CurrentPage < Model.Page.TotalPages ? "" : "disabled")"
+        <a class="btn border btn-next @(Model.Page.CurrentPage < Model.Page.TotalPages ? "" : "disabled")"
             onclick="existingModifiers(@Model.Page.CurrentPage + 1)">
             <img src="~/images/icons/chevron-right.svg" alt="">
-        </button>
+        </a>
     </div>
 </div>
 <!-- Pagination Ends -->

@@ -215,19 +215,24 @@ public class MenuController : Controller
     public async Task<IActionResult> GetModifierGroupModal(long modifierGroupId)
     {
         ModifierGroupViewModel model = await _modifierService.GetModifierGroup(modifierGroupId);
-        return PartialView("_AddModifierGroupPartialView", model);
+        return PartialView("_ModifierGroupPartialView", model);
     }
     #endregion Display Modifier Group
 
     #region Add/Update Modifier Group
 
     [HttpPost]
-    public async Task<IActionResult> SaveModifierGroup(ModifierGroupViewModel model)
+    public async Task<IActionResult> SaveModifierGroup(ModifierGroupViewModel model, string modifierList)
     {
         if (!ModelState.IsValid)
         {
             ModifierGroupViewModel updatedModel = await _modifierService.GetModifierGroup(model.ModifierGroupId);
-            return PartialView("_AddModifierGroupPartialView", updatedModel);
+            return PartialView("_ModifierGroupPartialView", updatedModel);
+        }
+
+        if (!string.IsNullOrEmpty(modifierList))
+        {
+            model.ModifierIdList = JsonSerializer.Deserialize<List<long>>(modifierList);
         }
 
         string token = Request.Cookies["authToken"];
@@ -237,7 +242,7 @@ public class MenuController : Controller
         if (!success)
         {
             ModifierGroupViewModel updatedModel = await _modifierService.GetModifierGroup(model.ModifierGroupId);
-            return PartialView("_AddModifierGroupPartialView", updatedModel);
+            return PartialView("_ModifierGroupPartialView", updatedModel);
         }
         return Json(new { success = true, message = "Modifier Group Added Successful!" });
 
@@ -245,15 +250,18 @@ public class MenuController : Controller
     #endregion Add/Update Modifier Group
 
     #region Delete Modifier Group
-    [HttpGet]
+    [HttpPost]
     public async Task<IActionResult> DeleteModifierGroup(long modifierGroupId)
     {
-        bool success = await _modifierService.DeleteModifierGroup(modifierGroupId);
+        string token = Request.Cookies["authToken"];
+        string createrEmail = _jwtService.GetClaimValue(token, "email");
+
+        bool success = await _modifierService.DeleteModifierGroup(modifierGroupId, createrEmail);
         if (!success)
         {
-            return Json(new { success = false, message = "Modifier Not deleted!" });
+            return Json(new { success = false, message = "Modifier Group Not deleted!" });
         }
-        return Json(new { success = true, message = "Modifier deleted Successfully!" });
+        return Json(new { success = true, message = "Modifier Group deleted Successfully!" });
     }
     #endregion Delete Modifier Group
 
@@ -262,6 +270,14 @@ public class MenuController : Controller
     #region Modifier
 
     #region Display Modifiers
+    /*-------------------------------------------------------- Get Modifier ---------------------------------------------------------------------------------------------------
+   ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    [HttpGet]
+    public async Task<IActionResult> GetModifierModal(long modifierId)
+    {
+        ModifierViewModel model = await _modifierService.GetModifier(modifierId);
+        return PartialView("_ModifierPartialView", model);
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetModifiersList(long modifierGroupId, int pageSize, int pageNumber = 1, string search = "")
@@ -273,7 +289,7 @@ public class MenuController : Controller
             return NotFound(); // This triggers AJAX error
         }
 
-        return PartialView("_ModifiersPartialView", model);
+        return PartialView("_ModifiersListPartialView", model);
     }
 
     [HttpGet]
@@ -299,7 +315,7 @@ public class MenuController : Controller
         if (!ModelState.IsValid)
         {
             ModifierViewModel updatedModel = await _modifierService.GetModifier(model.ModifierId);
-            return PartialView("_AddModifierGroupPartialView", updatedModel);
+            return PartialView("_ModifierGroupPartialView", updatedModel);
         }
 
         string token = Request.Cookies["authToken"];
@@ -309,7 +325,7 @@ public class MenuController : Controller
         if (!success)
         {
             ModifierViewModel updatedModel = await _modifierService.GetModifier(model.ModifierId);
-            return PartialView("_AddModifierGroupPartialView", updatedModel);
+            return PartialView("_ModifierGroupPartialView", updatedModel);
         }
         return Json(new { success = true, message = "Modifier Added Successful!" });
 
@@ -319,9 +335,13 @@ public class MenuController : Controller
     #region Delete Modifier
     /*--------------------------------------------------------Delete One Modifier--------------------------------------------------------------------------------------------------------
     ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-    public async Task<IActionResult> DeleteModifier(long modifierId)
+    [HttpPost]
+    public async Task<IActionResult> DeleteModifier(long modifierId,long modifierGroupId)
     {
-        bool success = await _modifierService.DeleteModifier(modifierId);
+        string token = Request.Cookies["authToken"];
+        string createrEmail = _jwtService.GetClaimValue(token, "email");
+
+        bool success = await _modifierService.DeleteModifier(modifierId, modifierGroupId, createrEmail);
 
         if (!success)
         {
@@ -332,9 +352,13 @@ public class MenuController : Controller
 
     /*--------------------------------------------------------Delete Multiple Modifiers--------------------------------------------------------------------------------------------------------
     ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-    public async Task<IActionResult> MassDeleteModifier(List<long> modifierIdList)
+    [HttpPost]
+    public async Task<IActionResult> MassDeleteModifiers(List<long> modifierIdList,long modifierGroupId)
     {
-        bool success = await _modifierService.MassDeleteModifiers(modifierIdList);
+        string token = Request.Cookies["authToken"];
+        string createrEmail = _jwtService.GetClaimValue(token, "email");
+
+        bool success = await _modifierService.MassDeleteModifiers(modifierIdList, modifierGroupId, createrEmail);
 
         if (!success)
         {
