@@ -54,7 +54,7 @@ public class ModifierService : IModifierService
 
         ModifierGroup modifierGroup = await _modifierGroupRepository.GetByIdAsync(modifierGroupId);
 
-        ModifierGroupViewModel model = new ModifierGroupViewModel
+        ModifierGroupViewModel model = new ()
         {
             ModifierGroupId = modifierGroup.Id,
             Name = modifierGroup.Name,
@@ -136,9 +136,8 @@ public class ModifierService : IModifierService
     ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
     public async Task<bool> AddModifierMapping(long modifierGroupId, long modifierId, long createrId)
     {
-        bool success;
 
-        ModifierMapping mapping = new ModifierMapping()
+        ModifierMapping mapping = new ()
         {
             Modifierid = modifierId,
             Modifiergroupid = modifierGroupId,
@@ -335,11 +334,13 @@ public class ModifierService : IModifierService
 
         Modifier modifier = await _modifierRepository.GetByIdAsync(modifierId);
         
+        model.ModifierId = modifierId;
         model.ModifierName = modifier.Name;
         model.Rate = modifier.Rate;
         model.Quantity = modifier.Quantity;
         model.UnitId = modifier.UnitId;
         model.Description = modifier.Description;
+        model.SelectedMgList =  _modifierMappingRepository.GetByCondition(mm => mm.Modifierid == modifierId && !mm.IsDeleted).Select(m => m.Modifiergroupid).ToList();
 
         return model;
     }
@@ -371,7 +372,7 @@ public class ModifierService : IModifierService
     #region Add Modifier
     public async Task<bool> AddModifier(ModifierViewModel model, long createrId)
     {
-        Modifier modifier = new Modifier()
+        Modifier modifier = new ()
         {
             Name = model.ModifierName,
             Rate = model.Rate,
@@ -382,7 +383,23 @@ public class ModifierService : IModifierService
             CreatedBy = createrId
         };
 
-        return await _modifierRepository.AddAsync(modifier);
+        long modifierId = await _modifierRepository.AddAsyncReturnId(modifier);
+
+        if (modifierId < 1)
+        {
+            return false;
+        }
+
+        if (modifierId > 0)
+        {
+            foreach (long mgId in model.SelectedMgList)
+            {
+                bool success = await AddModifierMapping(mgId, modifierId, createrId);
+                if (!success)
+                    return false;
+            }
+        }
+        return true;
     }
     #endregion Add Modifier
 
@@ -400,7 +417,49 @@ public class ModifierService : IModifierService
         modifier.UpdatedBy = createrId;
         modifier.UpdatedAt = DateTime.Now;
 
-        return await _modifierRepository.UpdateAsync(modifier);
+        bool success = await _modifierRepository.UpdateAsync(modifier);
+        if (!success)
+            return false;
+
+        return await UpdateModifierGroupMapping( model.ModifierId, model.SelectedMgList ,  createrId);
+
+    }
+
+    public async Task<bool> UpdateModifierGroupMapping(long modifierId, List<long> modifierGroupList, long createrId)
+    {
+        List<long> existingMgList = _modifierMappingRepository
+        .GetByCondition(mm => mm.Modifierid == modifierId && !mm.IsDeleted)
+        .Select(m => m.Modifiergroupid)
+        .ToList();
+
+        List<long> removeMg = existingMgList.Except(modifierGroupList).ToList();
+
+        foreach (long mgId in removeMg)
+        {
+            ModifierMapping mapping =  await _modifierMappingRepository
+            .GetByStringAsync(mm => mm.Modifiergroupid == mgId && mm.Modifierid == modifierId && !mm.IsDeleted);
+
+            mapping.IsDeleted = true;
+            mapping.UpdatedBy = createrId;
+            mapping.UpdatedAt = DateTime.Now;
+
+            bool success = await _modifierMappingRepository.UpdateAsync(mapping);
+            if (!success)
+                return false;
+        }
+
+        foreach (long mgId in modifierGroupList)
+        {
+            ModifierMapping existingModifierGroup = await _modifierMappingRepository.GetByStringAsync(mg => mg.Modifiergroupid == mgId && mg.Modifierid == modifierId && mg.IsDeleted == false);
+            if (existingModifierGroup == null)
+            {
+                bool success = await AddModifierMapping(mgId, modifierId, createrId);
+                if (!success)
+                    return false;
+            }
+        }
+
+        return true;
     }
 
     #endregion Update Modifier 
@@ -449,8 +508,11 @@ public class ModifierService : IModifierService
         return true;
     }
 
+
     #endregion Delete Modifier 
 
     #endregion Modifier
+
+
 
 }

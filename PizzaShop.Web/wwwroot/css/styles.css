@@ -37,6 +37,10 @@ a{
     color: #929292
 }
 
+.clr-yellow{
+    color: #f7bc51;
+}
+
 /* Login Page */
 .hero-img{
     height: 100%;
@@ -219,7 +223,8 @@ td{
 .form-floating>label {
     z-index: 5;
     top: -5px;
-    left: 12px;
+    /* left: 10px; */
+    left: unset;
 }
 
 .browse>label{
@@ -238,6 +243,10 @@ td{
     background-color: white;
     border-bottom: 2px solid #0066A8;
     border-radius: 0px;
+}
+
+.nav-pills .nav-link.active img{
+    filter: brightness(0) saturate(100%) invert(23%) sepia(81%) saturate(1892%) hue-rotate(184deg) brightness(99%) contrast(101%);
 }
 
 .nav-link{
@@ -267,7 +276,7 @@ td{
     margin-right: 4px;
 }
 
-.category-list, .modifierGroup-list{
+.category-list, .modifierGroup-list, .section-list{
     overflow-y: scroll;
     height: 350px;
 }
@@ -280,20 +289,17 @@ td{
     visibility: hidden;
 }
 
-.menu-table, .user-table{
+table{
     overflow-x: auto; 
     white-space: nowrap; 
 }
 
-.menu-table th{
-    color: #686868;
-}
 
-.menu-table td{
+table td{
     font-weight: 500;
 }
 
-.menu-table td,th{
+table td,th{
     color: #686868 !important;
     white-space: nowrap;
 }
@@ -410,49 +416,11 @@ td{
     left: -25px;
 }
 
-/*Media query for login page*/
-@media (max-width: 435px) {
-    .profile-img{
-        /* border: 1px solid gray;
-        border-radius: 50%; */
-        position: relative;
-        top: -25px;
-        left: 10px;
-        height: 60px;
-    }
-
-    .camera-div{
-        height: fit-content;
-        width: fit-content;
-        border: 1px solid gray;
-        border-radius: 50%;
-        position: relative;
-        top: 40px;
-        left: -25px;
-        width: 20px;
-    }
-
-    .camera-img{
-        width: 20px;
-    }
-}
 
 /* Change Password */
 .ChangePassword-form input{ 
     min-width: 220px;
     max-width: 420px;
-}
-
-.ChangePassword-form .form-floating>label{
-    left: 0px;
-}
-
-.add-user-password .form-floating>label{
-    left: 0px;
-}
-
-.addMG-form .form-floating>label{
-    left: 0px;
 }
 
 .change-content{
@@ -469,18 +437,6 @@ td{
 /*-------------Role---------*/
 .role-table{
     max-width: 1300px;
-}
-
-.role-table td{
-    color: #686868;
-}
-
-.role-table thead{
-    font-weight: 700;
-}
-
-.role-table tbody{
-    font-weight: 600;
 }
 
 .form-check-input:checked {

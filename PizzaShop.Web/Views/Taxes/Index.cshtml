@@ -27,10 +27,8 @@
 </div>
 
 <!-- Table -->
-<div class="table-responsive bg-white px-3" id="taxContent">
-    <!-- Partial View -->
-
-
+<div class="bg-white" id="taxContent">
+    <!-- Tax Partial View -->
 </div>
 
 <!--------------------------------------Modals------------------------------------------------------------------------------------------
@@ -52,33 +50,44 @@
 
 @section Scripts {
 
-    @* Get the list of all taxes *@
+    @* Tax Pagination *@
     <script>
-        $(document).ready(function(){
-             GetAllTaxes();
+        $(document).ready(function () {
+            TaxPaginationAjax(1);
+        });
+
+         $(document).on("change", "#taxesPerPage", function () {
+            TaxPaginationAjax(1); // Reload data with new page size
         });
 
         $(document).on("input", "#searchTax", function () {
-            GetAllTaxes();
+            TaxPaginationAjax(1); // Reload data with new page size
         });
 
-        function GetAllTaxes() {
-            let searchQuery = $("#searchTax").val();
-            if (searchQuery == null) {
-                searchQuery = ""
+        function TaxPaginationAjax(pageNumber) {
+            if (!pageNumber) {
+                pageNumber = @((Model?.ItemsPageVM?.Page?.CurrentPage ?? 1));
             }
+            let pageSize = $("#taxesPerPage").val() || 5; // Default to 5 if no value selected
+            let searchTax = $("#searchTax").val();
 
             $.ajax({
                 url: '@Url.Action("GetAllTaxes", "Taxes")',
-                data: {search: searchQuery},
-                type: "GET",
+                data: {
+                    'pageSize': pageSize,
+                    'pageNumber': pageNumber,
+                    'search': searchTax
+                },
+                type: "POST",
                 dataType: "html",
                 success: function (data) {
                     $("#taxContent").html(data);
+                    $("#taxesPerPage").val(pageSize); // Reapply selected value after reload
                 },
                 error: function () {
-                    alert("No Tax Found");
-                    $("#taxContent").html('An error has occurred');
+                    console.log("There is error.Not successful");
+                    alert("No Items Found");
+                    $("#itemsListContent").html('An error has occurred');
                 }
             });
         }
