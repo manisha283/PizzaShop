@@ -12,16 +12,16 @@
         <h1 class="blue-text">Orders</h1>
     </div>
 
-    <div class="justify-content-end d-flex flex-column flex-md-row order-export-div">
+    <div class="justify-content-end d-flex flex-column flex-md-row order-export-div ">
 
         <div class="input-group me-2 my-2">
-            <input type="search" class="form-control" placeholder="Search" name="search" id="searchOrder">
+            <input type="search" class="form-control" placeholder="Search" name="search" id="searchQuery" oninput="PaginationAjax(1)">
             <button type="submit" class="input-group-text">
                 <img src="~/images/icons/search.svg" alt="">
             </button>
         </div>
 
-        <select asp-for="@Model.status" class="form-select me-2 my-2" id="orderStatus">
+        <select asp-for="@Model.status" class="form-select me-2 my-2" id="orderStatus" onchange="PaginationAjax(1)">
             <option selected value="All Status">All Status</option>
             @foreach (OrderStatus status in Model.Statuses)
             {
@@ -29,15 +29,14 @@
             }
         </select>
 
-        <select class="form-select me-2 my-2" id="dateRange">
+        <select class="form-select me-2 my-2" id="dateRange" onchange="PaginationAjax(1)">
             <option selected value="All Time">All Time</option>
             <option value="Last 7 Days">Last 7 Days</option>
             <option value="Last 30 Days">Last 30 Days</option>
             <option value="Current Month">Current Month</option>
         </select>
 
-        <a 
-            class="btn btn-blue text-nowrap d-flex align-items-center my-2" id="exportOrderBtn">
+        <a class="btn btn-blue text-nowrap d-flex justify-content-center align-items-center my-2" id="exportOrderBtn">
             <img src="~/images/icons/export-icon.svg" alt="" width="25px" />
             Export
         </a>
@@ -45,25 +44,30 @@
     </div>
 </div>
 
-<div class="d-flex flex-column flex-md-row justify-content-end align-items-center mb-3 dateRange-div">
+<div class="d-flex flex-column flex-md-row justify-content-end align-items-center mb-3 gap-2 dateRange-div">
 
-    <div class="form-floating me-2 mb-2">
-        <input type="date" class="form-control" id="fromDate" placeholder="">
-        <label for="fromDate">From Date</label>
+    <div class="d-flex justify-content-center gap-2">
+        <div class="form-floating ">
+            <input type="date" class="form-control" id="fromDate" placeholder="">
+            <label for="fromDate">From Date</label>
+        </div>
+
+        <div class="form-floating ">
+            <input type="date" class="form-control" id="toDate" placeholder="">
+            <label for="toDate">To Date</label>
+        </div>
     </div>
 
-    <div class="form-floating me-2 mb-2">
-        <input type="date" class="form-control" id="toDate" placeholder="">
-        <label for="toDate">To Date</label>
+    <div class="d-flex justify-content-center gap-2">
+        <button class="btn btn-blue text-nowrap" id="searchByDate" onclick="PaginationAjax(1)">
+            Search
+        </button>
+
+        <button class="btn btn-white text-nowrap" id="clearFilterBtn">
+            Clear
+        </button>
     </div>
 
-    <button class="btn btn-blue text-nowrap me-2 mb-2 px-4 py-2 " id="searchByDate">
-        Search
-    </button>
-
-    <button class="btn btn-white text-nowrap mb-2 px-4 py-2" id="clearFilterBtn">
-        Clear
-    </button>
 
 </div>
 
@@ -77,77 +81,50 @@
     @* Order Pagination *@
     <script>
         $(document).ready(function () {
-            OrderPaginationAjax(1);
+            PaginationAjax(1);
             let today = new Date().toISOString().split("T")[0];
             $("#fromDate, #toDate").attr("max", today);
         });
 
-        $(document).on("change", "#ordersPerPage", function () {
-            OrderPaginationAjax(1); // Reload data with new page size
-        });
-
-        $(document).on("input", "#searchOrder", function () {
-            OrderPaginationAjax(1); // Reload data with new page size
-        });
-
-        //sortingColumn
+        //Sorting Column
         let sortingColumn;
         let sortingOrder;
         $(document).on("click", ".sortBtn", function () {
             sortingColumn = $(this).data("column");
             sortingOrder = $(this).data("order");
-            OrderPaginationAjax(1);
+            PaginationAjax(1);
         });
 
-        //Applying Filter
-        $(document).on("change","#orderStatus",function(){
-            OrderPaginationAjax(1);
-        });
-
-        $(document).on("change","#dateRange",function(){
-            OrderPaginationAjax(1);
-        });
-
-        $(document).on("click","#searchByDate",function(){
-            OrderPaginationAjax(1);
-        });
-        
-        $(document).on("click","#clearFilterBtn",function(){
-            $("#searchOrder").val("");
+        //Clear Filter
+        $(document).on("click", "#clearFilterBtn", function () {
+            $("#searchQuery").val("");
             $("#orderStatus").val("All Status");
             $("#dateRange").val("All Time");
             $("#fromDate").val("");
             $("#toDate").val("");
-            OrderPaginationAjax(1);
+            PaginationAjax(1);
         });
 
-        function OrderPaginationAjax(pageNumber) {
-            let orderStatus = $("#orderStatus").val();
-            let dateRange = $("#dateRange").val();
-            let fromDate = $("#fromDate").val();
-            let toDate = $("#toDate").val();
-
-            let pageSize = $("#ordersPerPage").val() || 5; // Default to 5 if no value selected
-            let searchOrder = $("#searchOrder").val();
+        function PaginationAjax(pageNumber) {     
+            let filter = {
+                PageSize: $("#itemsPerPage").val(),
+                PageNumber: pageNumber,
+                Status:  $("#orderStatus").val(),
+                DateRange: $("#dateRange").val(),
+                FromDate: $("#fromDate").val(),
+                ToDate: $("#toDate").val(),
+                Column: sortingColumn,
+                Sort: sortingOrder,
+                Search: $("#searchQuery").val()
+            };
 
             $.ajax({
                 url: '@Url.Action("GetOrdersList", "Orders")',
-                data: {
-                    'status': orderStatus,
-                    'dateRange': dateRange,
-                    'fromDate': fromDate,
-                    'toDate': toDate,
-                    'column': sortingColumn,
-                    'sort': sortingOrder,
-                    'pageSize': pageSize,
-                    'pageNumber': pageNumber,
-                    'search': searchOrder
-                },
-                type: "GET",
+                data: { filter },
+                type: "POST",
                 dataType: "html",
                 success: function (data) {
                     $("#orderContent").html(data);
-                    $("#ordersPerPage").val(pageSize); // Reapply selected value after reload
                 },
                 error: function () {
                     console.log("There is error.Not successful");
@@ -172,7 +149,7 @@
     @* Export Order Details *@
     <script>
 
-        $(document).on("click","#exportOrderBtn",function(){
+        $(document).on("click", "#exportOrderBtn", function () {
             console.log("export btn clicked");
             exportOrderDetails();
         })
@@ -183,10 +160,10 @@
             let dateRange = $("#dateRange").val();
             let fromDate = $("#fromDate").val();
             let toDate = $("#toDate").val();
-            let searchOrder = $("#searchOrder").val();
+            let searchQuery = $("#searchQuery").val();
 
             $.ajax({
-                url: '@Url.Action("ExportOrderDetails", "Orders")',
+                url: '@Url.Action("ExportExcel", "Orders")',
                 data: {
                     'status': orderStatus,
                     'dateRange': dateRange,
@@ -194,7 +171,7 @@
                     'toDate': toDate,
                     'column': sortingColumn,
                     'sort': sortingOrder,
-                    'search': searchOrder
+                    'search': searchQuery
                 },
                 xhrFields: {
                     responseType: 'blob'
@@ -217,7 +194,7 @@
                     document.body.removeChild(link);
 
                     console.log("Export Successful");
-                  
+
                 },
                 error: function () {
                     console.log("There is error.Not successful");
@@ -225,6 +202,11 @@
                 }
             });
         }
+
+    </script>
+
+    @* Order Detail Ajax *@
+    <script>
 
     </script>
 }

@@ -4,7 +4,6 @@ a{
     text-decoration: none;
 }
 
-
 .blue{
     filter: brightness(0) saturate(100%) invert(23%) sepia(81%) saturate(1892%) hue-rotate(184deg) brightness(99%) contrast(101%);
 }
@@ -23,6 +22,10 @@ a{
 
 .bg-cream{
     background-color: #fdf5e6;
+}
+
+.bg-light-blue{
+    background-color: lightblue;
 }
 
 .blue-text{
@@ -169,15 +172,6 @@ nav{
     z-index: 10;
 }
 
-.searchBox{
-    position: relative;
-}
-
-.searchIcon{
-    position: absolute;
-    right: 8px;
-    top: 5px;
-}
 
 /* Users */
 .btn-blue{
@@ -277,7 +271,7 @@ td{
 }
 
 .category-list, .modifierGroup-list, .section-list{
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 350px;
 }
 
@@ -287,6 +281,10 @@ td{
 
 .EditDeleteCategory, .EditDeleteModifierGroup, .EditDeleteSection{
     visibility: hidden;
+}
+
+.search-group{
+    min-width: 200px;
 }
 
 table{
@@ -387,6 +385,10 @@ table td,th{
     width: 70px;
 }
 
+.modal-footer button{
+    width: 90px;
+}
+
 
 /* My Profile page */
 .myprofile-icons{
@@ -442,6 +444,39 @@ table td,th{
 .form-check-input:checked {
     background-color: #0066A8;
     border-color: #0066A8;
+}
+
+/* Order Details */
+.dateRange-div button{
+    min-width: 80px;
+    max-width: 145px;
+}
+
+.subtotal-table{
+    width: 200px;
+}
+
+.subtotal-table td{
+    color: black !important;
+    padding: 0px;
+}
+
+.order-detail{
+    max-width: 75%;
+}
+
+@media (max-width: 767px) {
+    .order-detail{
+        max-width: 90%;
+    }
+
+    .dateRange-div button{
+        width: 145px;
+    }
+    .order-export-div{
+        width: 300px;
+    }
+
 }
 
 

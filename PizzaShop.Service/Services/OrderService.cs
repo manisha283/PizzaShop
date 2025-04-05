@@ -1,7 +1,5 @@
-using System.Drawing;
 using System.Linq.Expressions;
-using OfficeOpenXml;
-using OfficeOpenXml.Style;
+using Microsoft.EntityFrameworkCore;
 using PizzaShop.Entity.Models;
 using PizzaShop.Entity.ViewModels;
 using PizzaShop.Repository.Interfaces;
@@ -14,12 +12,11 @@ public class OrderService : IOrderService
 {
     private readonly IGenericRepository<Order> _orderRepository;
     private readonly IGenericRepository<OrderStatus> _orderStatusRepository;
-
+    
     public OrderService(IGenericRepository<Order> orderRepository, IGenericRepository<OrderStatus> orderStatusRepository)
     {
         _orderRepository = orderRepository;
         _orderStatusRepository = orderStatusRepository;
-
     }
 
     public async Task<OrderIndexViewModel> GetOrderIndex()
@@ -30,46 +27,55 @@ public class OrderService : IOrderService
         };
         return model;
     }
-
-
-    public async Task<OrderPaginationViewModel> GetPagedOrder(string status, string dateRange, DateOnly? fromDate, DateOnly? toDate, string column, string sort, int pageSize, int pageNumber, string search)
+    #region Order Pagination
+    /*----------------------------------------------------Order Pagination----------------------------------------------------------------------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    public async Task<OrderPaginationViewModel> GetPagedRecord(FilterViewModel filter)
     {
+        filter.Search = string.IsNullOrEmpty(filter.Search) ? "" : filter.Search;
+
         (IEnumerable<Order> orders, int totalRecord) = await _orderRepository.GetPagedRecordsAsync(
-            pageSize,
-            pageNumber,
-            filter: o => !o.IsDeleted &&
-                    (string.IsNullOrEmpty(search.ToLower()) ||
-                    o.Customer.Name.ToLower().Contains(search.ToLower())),
+            filter.PageSize,
+            filter.PageNumber,
+            predicate: o => !o.IsDeleted &&
+                    (string.IsNullOrEmpty(filter.Search.ToLower()) ||
+                    o.Customer.Name.ToLower().Contains(filter.Search.ToLower())),
             orderBy: q => q.OrderBy(u => u.Id),
             includes: new List<Expression<Func<Order, object>>>
             {
-                o => o.Customer,
-                o => o.PaymentMethod,
-                o => o.Status,
-                o => o.CustomersReviews
+            o => o.Customer,
+            o => o.Payments,
+            o => o.Status,
+            o => o.CustomersReviews,
+            o => o.Invoices
+            },
+            thenIncludes: new List<Func<IQueryable<Order>, IQueryable<Order>>>
+            {
+            q => q.Include(op => op.Payments)
+            .ThenInclude(p => p.PaymentMethod)
             }
         );
 
         //For applying status filter
-        if (!string.IsNullOrEmpty(status) && status.ToLower() != "all status")
+        if (!string.IsNullOrEmpty(filter.Status) && filter.Status.ToLower() != "all status")
         {
-            orders = orders.Where(o => o.Status.Name.ToLower() == status.ToLower());
+            orders = orders.Where(o => o.Status.Name.ToLower() == filter.Status.ToLower());
         }
 
         //For applying date range filter
-        if (!string.IsNullOrEmpty(dateRange) && dateRange.ToLower() != "all time" && !fromDate.HasValue && !toDate.HasValue)
+        if (!string.IsNullOrEmpty(filter.DateRange) && filter.DateRange.ToLower() != "all time" && !filter.FromDate.HasValue && !filter.ToDate.HasValue)
         {
-            switch (dateRange.ToLower())
+            switch (filter.DateRange.ToLower())
             {
                 case "last 7 days":
-                    orders = orders.Where(o => o.Date >= DateOnly.FromDateTime(DateTime.Now.AddDays(-7)) && o.Date <= DateOnly.FromDateTime(DateTime.Now));
+                    orders = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt) >= DateOnly.FromDateTime(DateTime.Now.AddDays(-7)) && DateOnly.FromDateTime(o.CreatedAt) <= DateOnly.FromDateTime(DateTime.Now));
                     break;
                 case "last 30 days":
-                    orders = orders.Where(o => o.Date >= DateOnly.FromDateTime(DateTime.Now.AddDays(-7)) && o.Date <= DateOnly.FromDateTime(DateTime.Now));
+                    orders = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt) >= DateOnly.FromDateTime(DateTime.Now.AddDays(-30)) && DateOnly.FromDateTime(o.CreatedAt) <= DateOnly.FromDateTime(DateTime.Now));
                     break;
                 case "current month":
                     DateOnly startDate = DateOnly.FromDateTime(DateTime.Now);
-                    orders = orders.Where(x => x.Date.Month == startDate.Month && x.Date.Year == startDate.Year);
+                    orders = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt).Month == startDate.Month && DateOnly.FromDateTime(o.CreatedAt).Year == startDate.Year);
                     break;
                 default:
                     break;
@@ -77,27 +83,27 @@ public class OrderService : IOrderService
         }
 
         //Filtering Custom Dates
-        if(fromDate.HasValue)
-            orders = orders.Where(o => o.Date >= fromDate.Value);
-        if(toDate.HasValue)
-            orders = orders.Where(o => o.Date <= toDate.Value);
+        if (filter.FromDate.HasValue)
+            orders = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt) >= filter.FromDate.Value);
+        if (filter.ToDate.HasValue)
+            orders = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt) <= filter.ToDate.Value);
 
         //For sorting the column according to order
-        if (!string.IsNullOrEmpty(column))
+        if (!string.IsNullOrEmpty(filter.Column))
         {
-            switch (column)
+            switch (filter.Column)
             {
                 case "order":
-                    orders = sort == "asc" ? orders.OrderBy(o => o.Id) : orders.OrderByDescending(o => o.Id);
+                    orders = filter.Sort == "asc" ? orders.OrderBy(o => o.Id) : orders.OrderByDescending(o => o.Id);
                     break;
                 case "date":
-                    orders = sort == "asc" ? orders.OrderBy(o => o.Date) : orders.OrderByDescending(o => o.Date);
+                    orders = filter.Sort == "asc" ? orders.OrderBy(o => DateOnly.FromDateTime(o.CreatedAt)) : orders.OrderByDescending(o => DateOnly.FromDateTime(o.CreatedAt));
                     break;
                 case "customer":
-                    orders = sort == "asc" ? orders.OrderBy(o => o.Customer.Name) : orders.OrderByDescending(o => o.Customer.Name);
+                    orders = filter.Sort == "asc" ? orders.OrderBy(o => o.Customer.Name) : orders.OrderByDescending(o => o.Customer.Name);
                     break;
                 case "amount":
-                    orders = sort == "asc" ? orders.OrderBy(o => o.TotalAmount) : orders.OrderByDescending(o => o.TotalAmount);
+                    orders = filter.Sort == "asc" ? orders.OrderBy(o => o.FinalAmount) : orders.OrderByDescending(o => o.FinalAmount);
                     break;
                 default:
                     break;
@@ -111,32 +117,43 @@ public class OrderService : IOrderService
             Orders = orders.Select(o => new OrderViewModel()
             {
                 OrderId = o.Id,
-                Date = o.Date,
+                Date = DateOnly.FromDateTime(o.CreatedAt),
                 CustomerName = o.Customer.Name,
                 Status = o.Status.Name,
-                PaymentMode = o.PaymentMethod.Name,
+                PaymentMode = o.Payments.Where(p => p.OrderId == o.Id).Select(p => p.PaymentMethod.Name).First(),
                 Rating = (int)(o.CustomersReviews.Any() ? o.CustomersReviews.Average(r => r.Rating) : 0),
-                TotalAmount = o.TotalAmount
+                TotalAmount = o.FinalAmount
             })
         };
 
-        model.Page.SetPagination(totalRecord, pageSize, pageNumber);
+        totalRecord = model.Orders.Count();
+
+        model.Page.SetPagination(totalRecord, filter.PageSize, filter.PageNumber);
         return model;
     }
+    #endregion
 
-    public async Task<byte[]> ExportOrderDetails(string status, string dateRange, DateOnly? fromDate, DateOnly? toDate, string column, string sort, string search)
+    #region Export Excel
+    /*----------------------------------------------------Export Order List----------------------------------------------------------------------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    public async Task<byte[]> ExportExcel(string status, string dateRange, DateOnly? fromDate, DateOnly? toDate, string column, string sort, string search)
     {
-        IEnumerable<Order> orders = await _orderRepository.GetRecordDetails(
-            filter: o => !o.IsDeleted &&
+        IEnumerable<Order> orders = await _orderRepository.GetByCondition(
+            predicate: o => !o.IsDeleted &&
                     (string.IsNullOrEmpty(search.ToLower()) ||
                     o.Customer.Name.ToLower().Contains(search.ToLower())),
             orderBy: q => q.OrderBy(u => u.Id),
             includes: new List<Expression<Func<Order, object>>>
             {
                 o => o.Customer,
-                o => o.PaymentMethod,
+                o => o.Payments,
                 o => o.Status,
                 o => o.CustomersReviews
+            },
+            thenIncludes: new List<Func<IQueryable<Order>, IQueryable<Order>>>
+            {
+                q => q.Include(o => o.Payments)
+                    .ThenInclude(p => p.PaymentMethod)
             }
         );
 
@@ -152,14 +169,14 @@ public class OrderService : IOrderService
             switch (dateRange.ToLower())
             {
                 case "last 7 days":
-                    orders = orders.Where(o => o.Date >= DateOnly.FromDateTime(DateTime.Now.AddDays(-7)) && o.Date <= DateOnly.FromDateTime(DateTime.Now));
+                    orders = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt) >= DateOnly.FromDateTime(DateTime.Now.AddDays(-7)) && DateOnly.FromDateTime(o.CreatedAt) <= DateOnly.FromDateTime(DateTime.Now));
                     break;
                 case "last 30 days":
-                    orders = orders.Where(o => o.Date >= DateOnly.FromDateTime(DateTime.Now.AddDays(-7)) && o.Date <= DateOnly.FromDateTime(DateTime.Now));
+                    orders = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt) >= DateOnly.FromDateTime(DateTime.Now.AddDays(-7)) && DateOnly.FromDateTime(o.CreatedAt) <= DateOnly.FromDateTime(DateTime.Now));
                     break;
                 case "current month":
                     DateOnly startDate = DateOnly.FromDateTime(DateTime.Now);
-                    orders = orders.Where(x => x.Date.Month == startDate.Month && x.Date.Year == startDate.Year);
+                    orders = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt).Month == startDate.Month && DateOnly.FromDateTime(o.CreatedAt).Year == startDate.Year);
                     break;
                 default:
                     break;
@@ -167,291 +184,173 @@ public class OrderService : IOrderService
         }
 
         //Filtering Custom Dates
-        if(fromDate.HasValue)
-            orders = orders.Where(o => o.Date >= fromDate.Value);
-        if(toDate.HasValue)
-            orders = orders.Where(o => o.Date <= toDate.Value);
+        if (fromDate.HasValue)
+            orders = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt) >= fromDate.Value);
+        if (toDate.HasValue)
+            orders = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt) <= toDate.Value);
 
         //For sorting the column according to order
         if (!string.IsNullOrEmpty(column))
         {
-            switch (column)
+            switch (column.ToLower())
             {
                 case "order":
                     orders = sort == "asc" ? orders.OrderBy(o => o.Id) : orders.OrderByDescending(o => o.Id);
                     break;
                 case "date":
-                    orders = sort == "asc" ? orders.OrderBy(o => o.Date) : orders.OrderByDescending(o => o.Date);
+                    orders = sort == "asc" ? orders.OrderBy(o => DateOnly.FromDateTime(o.CreatedAt)) : orders.OrderByDescending(o => DateOnly.FromDateTime(o.CreatedAt));
                     break;
                 case "customer":
                     orders = sort == "asc" ? orders.OrderBy(o => o.Customer.Name) : orders.OrderByDescending(o => o.Customer.Name);
                     break;
                 case "amount":
-                    orders = sort == "asc" ? orders.OrderBy(o => o.TotalAmount) : orders.OrderByDescending(o => o.TotalAmount);
+                    orders = sort == "asc" ? orders.OrderBy(o => o.FinalAmount) : orders.OrderByDescending(o => o.FinalAmount);
                     break;
                 default:
                     break;
             }
         }
 
-        //Setting the filtered and sorted values in View Model
-        OrderPaginationViewModel model = new()
-        {
-            Page = new(),
-            Orders = orders.Select(o => new OrderViewModel()
+        List<OrderViewModel> orderList = orders.Select(o => new OrderViewModel()
             {
                 OrderId = o.Id,
-                Date = o.Date,
+                Date = DateOnly.FromDateTime(o.CreatedAt),
                 CustomerName = o.Customer.Name,
                 Status = o.Status.Name,
-                PaymentMode = o.PaymentMethod.Name,
+                PaymentMode = o.Payments.Where(p => p.OrderId == o.Id).Select(p => p.PaymentMethod.Name).First(),
                 Rating = (int)(o.CustomersReviews.Any() ? o.CustomersReviews.Average(r => r.Rating) : 0),
-                TotalAmount = o.TotalAmount
-            })
-        };
+                TotalAmount = o.FinalAmount
+            }).ToList();
 
-        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-        using var package = new ExcelPackage();
-
-        var worksheet = package.Workbook.Worksheets.Add("Orders");
-        var currentRow = 3;
-        var currentCol = 2;
-
-        // this is first row....................................
-        worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 1].Merge = true;
-        worksheet.Cells[currentRow, currentCol].Value = "Status: ";
-        using (var headingCells = worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 1])
-        {
-            headingCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            headingCells.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#0066A7"));
-            headingCells.Style.Font.Bold = true;
-            headingCells.Style.Font.Color.SetColor(Color.White);
-            headingCells.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-
-            headingCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            headingCells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-        }
-        currentCol += 2;
-        worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 3].Merge = true;
-        worksheet.Cells[currentRow, currentCol].Value = status;
-        using (var headingCells = worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 3])
-        {
-            headingCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            headingCells.Style.Fill.BackgroundColor.SetColor(Color.White);
-            headingCells.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-
-
-            headingCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            headingCells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-        }
-
-        currentCol += 5;
-        worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 1].Merge = true;
-        worksheet.Cells[currentRow, currentCol].Value = "Search Text: ";
-        using (var headingCells = worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 1])
-        {
-            headingCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            headingCells.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#0066A7"));
-            headingCells.Style.Font.Bold = true;
-            headingCells.Style.Font.Color.SetColor(Color.White);
-            headingCells.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-
-            headingCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            headingCells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-        }
-
-        currentCol += 2;
-        worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 3].Merge = true;
-        worksheet.Cells[currentRow, currentCol].Value = search;
-        using (var headingCells = worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 3])
-        {
-            headingCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            headingCells.Style.Fill.BackgroundColor.SetColor(Color.White);
-            headingCells.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-
-
-            headingCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            headingCells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-        }
-
-        currentCol += 5;
-
-        worksheet.Cells[currentRow, currentCol, currentRow + 4, currentCol + 1].Merge = true;
-
-        // Insert Logo
-        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logos", "pizzashop_logo.png");
-
-        if (File.Exists(imagePath))
-        {
-            var picture = worksheet.Drawings.AddPicture("Image", new FileInfo(imagePath));
-            picture.SetPosition(currentRow - 1, 1, currentCol - 1, 1);
-            picture.SetSize(125, 95);
-        }
-        else
-        {
-            worksheet.Cells[currentRow, currentCol].Value = "Image not found";
-        }
-
-        // this is second row....................................
-        currentRow += 3;
-        currentCol = 2;
-        worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 1].Merge = true;
-        worksheet.Cells[currentRow, currentCol].Value = "Date: ";
-        using (var headingCells = worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 1])
-        {
-            headingCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            headingCells.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#0066A7"));
-            headingCells.Style.Font.Bold = true;
-            headingCells.Style.Font.Color.SetColor(Color.White);
-            headingCells.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-
-            headingCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            headingCells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-        }
-
-        currentCol += 2;
-        worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 3].Merge = true;
-        worksheet.Cells[currentRow, currentCol].Value = dateRange;
-        using (var headingCells = worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 3])
-        {
-            headingCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            headingCells.Style.Fill.BackgroundColor.SetColor(Color.White);
-            headingCells.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-
-
-            headingCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            headingCells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-        }
-
-        currentCol += 5;
-        worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 1].Merge = true;
-        worksheet.Cells[currentRow, currentCol].Value = "No. of Records: ";
-        using (var headingCells = worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 1])
-        {
-            headingCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            headingCells.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#0066A7"));
-            headingCells.Style.Font.Bold = true;
-            headingCells.Style.Font.Color.SetColor(Color.White);
-            headingCells.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-
-            headingCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            headingCells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-        }
-
-        currentCol += 2;
-        worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 3].Merge = true;
-        worksheet.Cells[currentRow, currentCol].Value = orders.Count();
-        using (var headingCells = worksheet.Cells[currentRow, currentCol, currentRow + 1, currentCol + 3])
-        {
-            headingCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            headingCells.Style.Fill.BackgroundColor.SetColor(Color.White);
-            headingCells.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-
-
-            headingCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            headingCells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-        }
-
-
-
-        // this is table ....................................
-        int headingRow = currentRow + 4;
-        int headingCol = 2;
-
-        worksheet.Cells[headingRow, headingCol].Value = "Order No";
-        headingCol++;
-
-        worksheet.Cells[headingRow, headingCol, headingRow, headingCol + 2].Merge = true;
-        worksheet.Cells[headingRow, headingCol].Value = "Order Date";
-        headingCol += 3;  // Move to next unmerged column
-
-        worksheet.Cells[headingRow, headingCol, headingRow, headingCol + 2].Merge = true;
-        worksheet.Cells[headingRow, headingCol].Value = "Customer Name";
-        headingCol += 3;
-
-        worksheet.Cells[headingRow, headingCol, headingRow, headingCol + 2].Merge = true;
-        worksheet.Cells[headingRow, headingCol].Value = "Status";
-        headingCol += 3;
-
-        worksheet.Cells[headingRow, headingCol, headingRow, headingCol + 1].Merge = true;
-        worksheet.Cells[headingRow, headingCol].Value = "Payment Mode";
-        headingCol += 2;
-
-        worksheet.Cells[headingRow, headingCol, headingRow, headingCol + 1].Merge = true;
-        worksheet.Cells[headingRow, headingCol].Value = "Average Rating";
-        headingCol += 2;
-
-        worksheet.Cells[headingRow, headingCol, headingRow, headingCol + 1].Merge = true;
-        worksheet.Cells[headingRow, headingCol].Value = "Total Amount";
-
-
-        using (var headingCells = worksheet.Cells[headingRow, 2, headingRow, headingCol + 1])
-        {
-            headingCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            headingCells.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#0066A7"));
-            headingCells.Style.Font.Bold = true;
-            headingCells.Style.Font.Color.SetColor(Color.White);
-
-            headingCells.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-
-
-            headingCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            headingCells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-        }
-
-
-        // Populate data
-        int row = headingRow + 1;
-        foreach (Order order in orders)
-        {
-            int startCol = 2;
-
-            worksheet.Cells[row, startCol].Value = order.Id;
-            startCol += 1;
-
-            worksheet.Cells[row, startCol, row, startCol + 2].Merge = true;
-            worksheet.Cells[row, startCol].Value = order.Date;
-            startCol += 3;
-
-            worksheet.Cells[row, startCol, row, startCol + 2].Merge = true;
-            worksheet.Cells[row, startCol].Value = order.Customer.Name;
-            startCol += 3;
-
-            worksheet.Cells[row, startCol, row, startCol + 2].Merge = true;
-            worksheet.Cells[row, startCol].Value = order.Status.Name;
-            startCol += 3;
-
-            worksheet.Cells[row, startCol, row, startCol + 1].Merge = true;
-            worksheet.Cells[row, startCol].Value = order.PaymentMethod.Name;
-            startCol += 2;
-
-            worksheet.Cells[row, startCol, row, startCol + 1].Merge = true;
-            worksheet.Cells[row, startCol].Value = (int)(order.CustomersReviews.Any() ? order.CustomersReviews.Average(r => r.Rating) : 0);
-            startCol += 2;
-
-            worksheet.Cells[row, startCol, row, startCol + 1].Merge = true;
-            worksheet.Cells[row, startCol].Value = order.TotalAmount;
-
-            using (var rowCells = worksheet.Cells[row, 2, row, startCol + 1])
-            {
-                // Apply alternating row colors (light gray for better readability)
-                if (row % 2 == 0)
-                {
-                    rowCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                    rowCells.Style.Fill.BackgroundColor.SetColor(Color.LightGray);
-                }
-
-                // Apply black borders to each row
-                rowCells.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-
-
-                rowCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                rowCells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-            }
-
-            row++;
-        }
-        return await Task.FromResult(package.GetAsByteArray());
+        return ExcelTemplateHelper.Orders(orderList, status, dateRange, search);
     }
-    
+    #endregion
+
+    #region Order Details
+    /*----------------------------------------------------Order Details----------------------------------------------------------------------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    public async Task<OrderDetailViewModel> GetOrderDetail(long orderId)
+    {
+        try
+        {
+
+            IEnumerable<Order>? orderDetail = _orderRepository.GetByCondition(
+                predicate: o => o.Id == orderId && !o.IsDeleted,
+                includes: new List<Expression<Func<Order, object>>>
+                {
+                o => o.Status,
+                o => o.Invoices,
+                o => o.Customer,
+                o => o.OrderTableMappings,
+                o => o.OrderTaxMappings,
+                o => o.OrderItems,
+                o => o.Payments
+                },
+                thenIncludes: new List<Func<IQueryable<Order>, IQueryable<Order>>>
+                {
+                q => q.Include(o => o.OrderTableMappings)
+                    .ThenInclude(otm => otm.Table)
+                    .ThenInclude(t => t.Section),
+                q => q.Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Item),
+                q => q.Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.OrderItemsModifiers)
+                    .ThenInclude(m => m.Modifier),
+                q => q.Include(o => o.Payments)
+                    .ThenInclude(p => p.PaymentMethod),
+                q => q.Include(o => o.OrderTaxMappings)
+                    .ThenInclude(otm => otm.Tax)
+                }
+            ).Result;
+
+            var model = orderDetail
+            .Select(o => new OrderDetailViewModel
+            {
+                OrderId = o.Id,
+
+                OrderStatus = o.Status.Name,
+
+                InvoiceNo = o.Invoices
+                            .Where(i => i.OrderId == o.Id)
+                            .Select(i => i.InvoiceNo)
+                            .First(),
+
+                PaidOn = o.Payments
+                        .Where(p => p.OrderId == o.Id)
+                        .Select(p => p.Date)
+                        .First()
+                        .ToString() ?? "",
+
+                PlacedOn = o.CreatedAt.ToString(),
+
+                ModifiedOn = o.UpdatedAt.ToString() ?? "",
+
+                OrderDuration = (o.Payments.Where(p => p.OrderId == o.Id).Select(p => p.Date).First()
+                                - o.CreatedAt)
+                                .ToString() ?? "",
+
+                CustomerName = o.Customer.Name,
+
+                CustomerPhone = o.Customer.Phone,
+
+                NoOfPerson = o.Members,
+
+                CustomerEmail = o.Customer.Email,
+
+                TableList = o.OrderTableMappings
+                            .Where(ot => ot.OrderId == o.Id)
+                            .Select(ot => ot.Table.Name)
+                            .ToList(),
+
+                Section = o.OrderTableMappings
+                        .Where(ot => ot.OrderId == o.Id)
+                        .Select(ot => ot.Table.Section.Name)
+                        .First(),
+
+                ItemsList = o.OrderItems
+                            .Where(oi => oi.OrderId == o.Id)
+                            .Select(oi => new OrderItemViewModel
+                            {
+                                ItemName = oi.Item.Name,
+                                Quantity = oi.Quantity,
+                                Price = oi.Price,
+                                TotalAmount = oi.Quantity * oi.Price,
+                                ModifiersList = oi.OrderItemsModifiers
+                                                .Where(oim => oim.OrderItemId == oi.Id)
+                                                .Select(oim => new ModifierViewModel
+                                                {
+                                                    ModifierName = oim.Modifier.Name,
+                                                    Quantity = oim.Quantity,
+                                                    Rate = oim.Price,
+                                                    TotalAmount = oim.Quantity * oim.Price
+                                                }).ToList()
+                            }).ToList(),
+
+                Subtotal = o.SubTotal,
+
+                TaxList = o.OrderTaxMappings.Where(otm => otm.OrderId == o.Id)
+                            .Select(otm => new TaxViewModel
+                            {
+                                Name = otm.Tax.Name,
+                                TaxValue = otm.TaxValue
+                            }).ToList(),
+
+                FinalAmount = o.FinalAmount ,
+
+                PaymentMethod = o.Payments.Where(p => p.OrderId == o.Id).Select(p => p.PaymentMethod.Name).First(),
+
+            }).FirstOrDefault();
+
+
+            return model;
+
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
+    #endregion
+
+
 }

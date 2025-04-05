@@ -1,0 +1,265 @@
+@{
+    ViewData["Title"] = "Customers";
+    Layout = "_Layout";
+}
+
+<!-- Customer heading, search and export button -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-1 gap-md-5">
+    <div>
+        <h1 class="blue-text">Customers</h1>
+    </div>
+
+    <div class="justify-content-end d-flex flex-column flex-md-row customer-export-div ">
+
+        <div class="input-group me-2 my-2">
+            <input type="search" class="form-control" placeholder="Search" name="search" id="searchCustomer" oninput="PaginationAjax()">
+            <button type="submit" class="input-group-text">
+                <img src="~/images/icons/search.svg" alt="">
+            </button>
+        </div>
+
+        <select class="form-select me-2 my-2" id="dateRange">
+            <option selected value="All Time">All Time</option>
+            <option value="Today">Today</option>
+            <option value="Last 7 Days">Last 7 Days</option>
+            <option value="Last 30 Days">Last 30 Days</option>
+            <option value="Current Month">Current Month</option>
+            <option value="Custom Date">Custom Date</option>
+        </select>
+
+        <a class="btn btn-blue text-nowrap d-flex justify-content-center align-items-center my-2"
+            id="exportCustomerBtn">
+            <img src="~/images/icons/export-icon.svg" alt="" width="25px" />
+            Export
+        </a>
+
+    </div>
+</div>
+
+
+<!-- Table -->
+<div class="bg-white px-3" id="customerContent">
+    <!-- Partial View -->
+</div>
+
+<!-- Modal Custom date Range starts -->
+<div class="modal fade" id="customDateRange" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Select Date Range</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    id="customDateClose"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row mx-0 gap-2">
+                    <div class="form-floating col p-0">
+                        <input type="date" class="form-control" id="fromDate" placeholder="">
+                        <label for="fromDate">From Date</label>
+                    </div>
+
+                    <div class="form-floating col p-0">
+                        <input type="date" class="form-control" id="toDate" placeholder="">
+                        <label for="toDate">To Date</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="button" class="btn btn-blue" id="customDateSubmit">Submit</button>
+                <button type="button" class="btn btn-white" data-bs-dismiss="modal"
+                    id="customDateCancel">Cancel</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- Modal Custom date Range ends -->
+
+<!-- Modal Customer History starts -->
+<div class="modal fade" id="customerHistory" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" id="customerHistoryContent">
+            <!-- Customer History Partial View -->
+        </div>
+    </div>
+</div>
+<!-- Modal Customer History ends -->
+
+
+@section Scripts {
+    @* Customer Pagination *@
+    <script>
+        $(document).ready(function () {
+            PaginationAjax(1);
+        });
+
+        //sortingColumn
+        let sortingColumn;
+        let sortingOrder;
+        $(document).on("click", ".sortBtn", function () {
+            sortingColumn = $(this).data("column");
+            sortingOrder = $(this).data("order");
+            PaginationAjax(1);
+        });
+
+        //Applying Filter
+        $(document).on("change", "#dateRange", function () {
+            if ($(this).val() == "Custom Date") {
+                $("#fromDate").val("");
+                $("#toDate").val("");
+                let today = new Date().toISOString().split("T")[0];
+                $("#fromDate, #toDate").attr("max", today);
+                $("#customDateRange").modal("show");
+            }
+            else {
+                PaginationAjax(1);
+            }
+        });
+
+        //Selecting custom date range
+        $(document).on("click", "#customDateSubmit", function () {
+            $("#customDateRange").modal("hide");
+            PaginationAjax(1);
+        })
+
+        //Close custom date modal
+        $(document).on("click", "#customDateClose, #customDateCancel", function () {
+            $("#customDateRange").modal("hide");
+            $("#dateRange").val($("#dateRange option:first").val());
+            PaginationAjax(1);
+        })
+
+        // Validate Date
+        $(document).on("change", "#fromDate", function () {
+            let fromDate = $(this).val();
+            $("#toDate").attr("min", fromDate); // Restrict "To Date" to not be before "From Date"
+        });
+
+        $(document).on("change", "#toDate", function () {
+            let toDate = $(this).val();
+            $("#fromDate").attr("max", toDate); // Restrict "From Date" to not be after "To Date"
+        });
+
+        function PaginationAjax(pageNumber) {
+            let dateRange = $("#dateRange").val();
+            let fromDate = $("#fromDate").val();
+            let toDate = $("#toDate").val();
+            let pageSize = $("#itemsPerPage").val() || 5; // Default to 5 if no value selected
+            let searchCustomer = $("#searchCustomer").val();
+
+            $.ajax({
+                url: '@Url.Action("GetCustomersList", "Customers")',
+                data: {
+                    'dateRange': dateRange,
+                    'fromDate': fromDate,
+                    'toDate': toDate,
+                    'column': sortingColumn,
+                    'sort': sortingOrder,
+                    'pageSize': pageSize,
+                    'pageNumber': pageNumber,
+                    'search': searchCustomer
+                },
+                type: "GET",
+                dataType: "html",
+                success: function (data) {
+                    $("#customerContent").html(data);
+                    $("#customersPerPage").val(pageSize); // Reapply selected value after reload
+                },
+                error: function () {
+                    console.log("There is error.Not successful");
+                    alert("No Items Found");
+                    $("#itemsListContent").html('An error has occurred');
+                }
+            });
+        }
+
+    </script>
+
+    @* Export Customer Details *@
+    <script>
+
+        $(document).on("click", "#exportCustomerBtn", function () {
+            console.log("export btn clicked");
+            exportCustomerDetails();
+        })
+
+        function exportCustomerDetails() {
+            console.log("export function called");
+            let dateRange = $("#dateRange").val();
+            let fromDate = $("#fromDate").val();
+            let toDate = $("#toDate").val();
+            let searchCustomer = $("#searchCustomer").val();
+
+            $.ajax({
+                url: '@Url.Action("ExportExcel", "Customers")',
+                data: {
+                    'dateRange': dateRange,
+                    'fromDate': fromDate,
+                    'toDate': toDate,
+                    'column': sortingColumn,
+                    'sort': sortingOrder,
+                    'search': searchCustomer
+                },
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (data, status, xhr) {
+                    let filename = "Customers.xlsx";
+
+                    let disposition = xhr.getResponseHeader('Content-Disposition');
+                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                        let matches = /filename="([^"]+)"/.exec(disposition);
+                        if (matches !== null && matches[1]) filename = matches[1];
+                    }
+
+                    let blob = new Blob([data], { type: xhr.getResponseHeader('Content-Type') });
+                    let link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    console.log("Export Successful");
+
+                },
+                error: function () {
+                    console.log("There is error.Not successful");
+                    alert("Not exported!");
+                }
+            });
+        }
+
+    </script>
+
+    @* Customer History Modal *@
+    <script>
+
+        $(document).on("click", ".customerRow", function () {
+            $("#customerHistory").modal("show");
+            GetCustomerHistory($(this).data("id"));
+        });
+
+        function GetCustomerHistory(id) {
+            $.ajax({
+                url: '@Url.Action("CustomerHistory", "Customers")',
+                type: "GET",
+                data: { customerId: id },
+                dataType: "html",
+                success: function (data) {
+                    console.log("hii");
+                    console.log(data);
+                    $("#customerHistoryContent").html(data);
+                },
+                error: function () {
+                    console.log("There is error.Not successful");
+                    alert("No Customer history Found");
+                }
+            })
+        }
+    </script>
+
+}

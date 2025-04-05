@@ -19,10 +19,9 @@ public class CategoryItemService : ICategoryItemService
     private readonly IGenericRepository<Unit> _unitRepository;
     private readonly IGenericRepository<ModifierGroup> _modifierGroupRepository;
     private readonly IGenericRepository<ItemModifierGroup> _itemModifierGroupRepository;
-    private readonly IGenericRepository<Modifier> _modifierRepository;
-    private readonly IGenericRepository<ModifierMapping> _modifierMapping;
+    
 
-    public CategoryItemService(IGenericRepository<Category> categoryRepository, IGenericRepository<User> userRepository, IGenericRepository<Item> itemRepository, IGenericRepository<FoodType> foodTypeRepository, IGenericRepository<Unit> unitRepository, IGenericRepository<ModifierGroup> modifierGroupRepository, IGenericRepository<ItemModifierGroup> itemModifierGroupRepository, IGenericRepository<Modifier> modifierRepository, IGenericRepository<ModifierMapping> modifierMapping = null)
+    public CategoryItemService(IGenericRepository<Category> categoryRepository, IGenericRepository<User> userRepository, IGenericRepository<Item> itemRepository, IGenericRepository<FoodType> foodTypeRepository, IGenericRepository<Unit> unitRepository, IGenericRepository<ModifierGroup> modifierGroupRepository, IGenericRepository<ItemModifierGroup> itemModifierGroupRepository)
     {
         _categoryRepository = categoryRepository;
         _userRepository = userRepository;
@@ -31,9 +30,6 @@ public class CategoryItemService : ICategoryItemService
         _unitRepository = unitRepository;
         _modifierGroupRepository = modifierGroupRepository;
         _itemModifierGroupRepository = itemModifierGroupRepository;
-        _modifierRepository = modifierRepository;
-        _modifierMapping = modifierMapping;
-
     }
 
     #region Category
@@ -43,7 +39,7 @@ public class CategoryItemService : ICategoryItemService
     ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
     public List<CategoryViewModel> GetCategory()
     {
-        List<CategoryViewModel>? categories = _categoryRepository.GetByCondition(c => c.IsDeleted == false)
+        List<CategoryViewModel>? categories = _categoryRepository.GetByCondition(c => c.IsDeleted == false).Result
         .Select(category => new CategoryViewModel
         {
             CategoryId = category.Id,
@@ -64,8 +60,9 @@ public class CategoryItemService : ICategoryItemService
         User creater = await _userRepository.GetByStringAsync(u => u.Email == createrEmail);
         long createrId = creater.Id;
 
-        if(createrId == 0)
+        if(createrId == 0){
             return false;
+        }
 
         if(model.CategoryId == 0)
         {
@@ -78,8 +75,6 @@ public class CategoryItemService : ICategoryItemService
         else{
             return false;
         }
-        return false;
-        
     }
 
 
@@ -161,7 +156,7 @@ public class CategoryItemService : ICategoryItemService
         (IEnumerable<Item> items, int totalRecord) = await _itemRepository.GetPagedRecordsAsync(
             pageSize,
             pageNumber,
-            filter: i => !i.IsDeleted &&
+            predicate: i => !i.IsDeleted &&
                     i.CategoryId == categoryId &&
                     (string.IsNullOrEmpty(search.ToLower()) ||
                     i.Name.ToLower().Contains(search.ToLower())),
@@ -225,7 +220,7 @@ public class CategoryItemService : ICategoryItemService
         model.Description = item.Description;
         model.ItemImageUrl = item.ImageUrl;
 
-        model.ItemModifierGroups = _itemModifierGroupRepository.GetByConditionInclude(
+        model.ItemModifierGroups = _itemModifierGroupRepository.GetByCondition(
             i => i.ItemId == itemId && !i.IsDeleted,
             includes: new List<Expression<Func<ItemModifierGroup, object>>>
             {
@@ -264,7 +259,7 @@ public class CategoryItemService : ICategoryItemService
     ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
     public async Task<ItemModifierViewModel> GetModifierOnSelection(long modifierGroupId)
     {
-        ItemModifierViewModel itemModifierGroups = _modifierGroupRepository.GetByConditionInclude(
+        ItemModifierViewModel itemModifierGroups =  _modifierGroupRepository.GetByCondition(
             m => m.Id == modifierGroupId && !m.IsDeleted,
             includes: new List<Expression<Func<ModifierGroup, object>>>
             {
@@ -445,6 +440,7 @@ public class CategoryItemService : ICategoryItemService
     {
         List<long> existingGroupList = _itemModifierGroupRepository
         .GetByCondition(m => m.ItemId == itemId && !m.IsDeleted)
+        .Result
         .Select(mg => mg.ModifierGroupId)
         .ToList();
 

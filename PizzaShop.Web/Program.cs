@@ -8,13 +8,14 @@ using PizzaShop.Repository.Repositories;
 using PizzaShop.Service.Configuration;
 using PizzaShop.Service.Interfaces;
 using PizzaShop.Service.Services;
+using PizzaShop.Web.Middlewares;
+using Rotativa.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region Services
 /*---------------Add services to the container.-----------------------------------------------
 -------------------------------------------------------------------------------------------*/
-
 builder.Services.AddControllersWithViews();
 
 //HttpContext
@@ -64,6 +65,8 @@ builder.Services.AddScoped<ITaxesFeesService, TaxesFeesService>();
 //Orders
 builder.Services.AddScoped<IOrderService, OrderService>();
 
+//Customers
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 //Session 
 builder.Services.AddSession(options =>
@@ -139,6 +142,9 @@ app.Use(async (context, next) =>
     await next();
 });
 
+//For initialising middleware - custom authorization
+app.UseMiddleware<RolePermissionMiddleware>();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -147,6 +153,9 @@ app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Rotativa
+app.UseRotativa();
 
 app.MapControllerRoute(
     name: "default",

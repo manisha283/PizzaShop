@@ -3,6 +3,7 @@ using PizzaShop.Entity.Models;
 using PizzaShop.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace PizzaShop.Repository.Repositories;
 
@@ -42,7 +43,7 @@ public class GenericRepository<T> : IGenericRepository<T>
             await _dbSet.AddAsync(entity);
             await _context.SaveChangesAsync();
 
-            var idProperty = typeof(T).GetProperty("Id");
+            PropertyInfo? idProperty = typeof(T).GetProperty("Id");
             if (idProperty != null)
             {
                 return (long)idProperty.GetValue(entity);
@@ -66,49 +67,8 @@ public class GenericRepository<T> : IGenericRepository<T>
     -------------------------------------------------------------------------------------------------------*/
     public IEnumerable<T> GetAll() => _dbSet;
 
-    public IEnumerable<T> GetByCondition(Expression<Func<T, bool>> predicate)
-    {
-        return _dbSet.Where(predicate);
-    }
-
-
-    public async Task<IEnumerable<T>> GetByConditionInclude(
-        Expression<Func<T, bool>> predicate,
-        List<Expression<Func<T, object>>>? includes = null,
-        List<Func<IQueryable<T>, IQueryable<T>>>? thenIncludes = null)
-    {
-        IQueryable<T> query = _dbSet.Where(predicate);
-
-        // Apply Includes (First-level navigation properties)
-        if (includes != null)
-        {
-            foreach (var include in includes)
-            {
-                query = query.Include(include);
-            }
-        }
-
-        // Apply ThenIncludes (Deeper navigation properties)
-        if (thenIncludes != null)
-        {
-            foreach (var thenInclude in thenIncludes)
-            {
-                query = thenInclude(query);
-            }
-        }
-
-        return await query.ToListAsync();
-    }
-
-
-
-
-    /*------------------------------To Get sorted and paginated records with search functionality---------------
-   -------------------------------------------------------------------------------------------------------*/
-    public async Task<(IEnumerable<T> items, int totalCount)> GetPagedRecordsAsync(
-        int pageSize,
-        int pageNumber,
-        Expression<Func<T, bool>>? filter = null,
+    public async Task<IEnumerable<T>> GetByCondition(
+        Expression<Func<T, bool>>? predicate = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
         List<Expression<Func<T, object>>>? includes = null,
         List<Func<IQueryable<T>, IQueryable<T>>>? thenIncludes = null)
@@ -117,11 +77,19 @@ public class GenericRepository<T> : IGenericRepository<T>
         {
             IQueryable<T> query = _dbSet;
 
-            if (filter != null)
+            //Apply Filters
+            if (predicate != null)
             {
-                query = query.Where(filter);
+                query = query.Where(predicate);
             }
 
+            //Order By
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            // Apply Includes (First-level navigation properties)
             if (includes != null)
             {
                 foreach (var include in includes)
@@ -139,55 +107,7 @@ public class GenericRepository<T> : IGenericRepository<T>
                 }
             }
 
-            int totalCount = await query.CountAsync();
-
-            if (orderBy != null)
-            {
-                query = orderBy(query);
-            }
-
-            var items = query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            return (items, totalCount);
-        }
-        catch (Exception ex)
-        {
-            return (null,0);
-        }
-
-    }
-
-    public async Task<IEnumerable<T>> GetRecordDetails(
-        Expression<Func<T, bool>>? filter = null,
-        Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-        List<Expression<Func<T, object>>>? includes = null)
-    {
-        try
-        {
-            IQueryable<T> query = _dbSet;
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            if (includes != null)
-            {
-                foreach (var include in includes)
-                {
-                    query = query.Include(include);
-                }
-            }
-
-            if (orderBy != null)
-            {
-                query = orderBy(query);
-            }
-
-            return query.ToList();
+            return await query.ToListAsync();
         }
         catch (Exception ex)
         {
@@ -196,14 +116,39 @@ public class GenericRepository<T> : IGenericRepository<T>
 
     }
 
+    public async Task<(IEnumerable<T> items, int totalCount)> GetPagedRecordsAsync(
+        int pageSize,
+        int pageNumber,
+        Expression<Func<T, bool>>? predicate = null,
+        Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+        List<Expression<Func<T, object>>>? includes = null,
+        List<Func<IQueryable<T>, IQueryable<T>>>? thenIncludes = null)
+    {
+        try
+        {
+            var items = GetByCondition(predicate, orderBy, includes, thenIncludes).Result;
 
+            int totalCount = items.Count();
 
+            items = items
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (items, totalCount);
+        }
+        catch (Exception ex)
+        {
+            return (null, 0);
+        }
+
+    }
 
     /*----------------------retrieves a single record from the database by its primary key (id)----------------------------------------
     -------------------------------------------------------------------------------------------------------*/
 
-    public async Task<T?> GetByIdAsync(long id) => await _dbSet.FindAsync(id);
 
+    public async Task<T?> GetByIdAsync(long id) => await _dbSet.FindAsync(id);
 
     /*----------------------fetches a single record from the database based on a given condition----------------------------------------
     -------------------------------------------------------------------------------------------------------*/
@@ -235,28 +180,8 @@ public class GenericRepository<T> : IGenericRepository<T>
     #endregion U : Update
 
     #region D : Delete
-    /*------------------Deletes an entity from the database based on its id------------------------------------
+    /*------------------Only Soft Delete is allowed so no remove method------------------------------------
     -------------------------------------------------------------------------------------------------------*/
-    public async Task DeleteAsync(int id)
-    {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
-    }
-
-
-    /*-------------------------Deletes multiple records based on a given condition (predicate)---------------
-    -------------------------------------------------------------------------------------------------------*/
-    public async Task DeleteAssociatedEntitiesAsync(Expression<Func<T, bool>> predicate)
-    {
-        var entities = _dbSet.Where(predicate);
-        _dbSet.RemoveRange(entities);
-        await _context.SaveChangesAsync();
-    }
-
     #endregion D : Delete
 
     #region Common

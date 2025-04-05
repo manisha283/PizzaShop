@@ -9,7 +9,7 @@ public partial class Taxis
 
     public string Name { get; set; } = null!;
 
-    public string Type { get; set; } = null!;
+    public bool? IsPercentage { get; set; }
 
     public bool IsEnabled { get; set; }
 
@@ -28,6 +28,8 @@ public partial class Taxis
     public bool IsDeleted { get; set; }
 
     public virtual User CreatedByNavigation { get; set; } = null!;
+
+    public virtual ICollection<OrderTaxMapping> OrderTaxMappings { get; set; } = new List<OrderTaxMapping>();
 
     public virtual User? UpdatedByNavigation { get; set; }
 }
